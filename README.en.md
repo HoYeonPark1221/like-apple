@@ -22,13 +22,11 @@ claude plugin marketplace add HoYeonPark1221/like-apple
 claude plugin install like-apple@like-apple
 ```
 
-Usage is simple: tell Claude what to build and ask it to follow like-apple.
+Usage:
 
 ```
-/like-apple:like-apple build a settings screen
+/like-apple build it using this
 ```
-
-You can also skip the slash and just say "build it using like-apple".
 
 Update:
 

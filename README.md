@@ -24,13 +24,11 @@ claude plugin marketplace add HoYeonPark1221/like-apple
 claude plugin install like-apple@like-apple
 ```
 
-사용법은 간단합니다. 만들고 싶은 것과 함께 like-apple을 참고하라고 말하면 됩니다.
+사용법:
 
 ```
-/like-apple:like-apple 참고해서 설정 화면 만들어줘
+/like-apple 참고해서 만들어줘
 ```
-
-슬래시 없이 "like-apple 참고해서 만들어줘"라고만 해도 됩니다.
 
 업데이트:
 
