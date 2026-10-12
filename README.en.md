@@ -17,9 +17,13 @@ This skill is those rules, checked against Apple's HIG and measured against the 
 
 ## Install (Claude Code)
 
+Pick one of two ways.
+
+### Option 1. Simple install — `/like-apple`
+
 ```bash
-claude plugin marketplace add HoYeonPark1221/like-apple
-claude plugin install like-apple@like-apple
+git clone https://github.com/HoYeonPark1221/like-apple.git
+cp -R like-apple/skills/like-apple ~/.claude/skills/
 ```
 
 Usage:
@@ -28,13 +32,26 @@ Usage:
 /like-apple build it using this
 ```
 
-Update:
+To update, run `git pull` in the `like-apple` folder and repeat the `cp` command.
+
+### Option 2. Plugin install — easier updates
+
+```bash
+claude plugin marketplace add HoYeonPark1221/like-apple
+claude plugin install like-apple@like-apple
+```
+
+Usage:
+
+```
+/like-apple:like-apple build it using this
+```
+
+Plugin skills are prefixed with the plugin name. Updating takes one line:
 
 ```bash
 claude plugin update like-apple@like-apple
 ```
-
-To use it without the plugin system, copy the `skills/like-apple` folder into `~/.claude/skills/`.
 
 ## What's inside
 

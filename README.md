@@ -19,9 +19,13 @@ SwiftUI 애니메이션, 크기(베젤·둥근 모서리·글자), 플랫폼 관
 
 ## 설치 (Claude Code)
 
+두 가지 방법 중 하나를 고르세요.
+
+### 방법 1. 간단 설치 — `/like-apple`
+
 ```bash
-claude plugin marketplace add HoYeonPark1221/like-apple
-claude plugin install like-apple@like-apple
+git clone https://github.com/HoYeonPark1221/like-apple.git
+cp -R like-apple/skills/like-apple ~/.claude/skills/
 ```
 
 사용법:
@@ -30,13 +34,26 @@ claude plugin install like-apple@like-apple
 /like-apple 참고해서 만들어줘
 ```
 
-업데이트:
+업데이트는 `like-apple` 폴더에서 `git pull` 한 뒤 위의 `cp` 명령을 다시 실행합니다.
+
+### 방법 2. 플러그인 설치 — 업데이트가 편함
+
+```bash
+claude plugin marketplace add HoYeonPark1221/like-apple
+claude plugin install like-apple@like-apple
+```
+
+사용법:
+
+```
+/like-apple:like-apple 참고해서 만들어줘
+```
+
+플러그인으로 설치한 스킬은 이름 앞에 플러그인 이름이 붙습니다. 업데이트는 한 줄이면 됩니다.
 
 ```bash
 claude plugin update like-apple@like-apple
 ```
-
-플러그인 없이 쓰려면 `skills/like-apple` 폴더를 `~/.claude/skills/`에 복사해도 됩니다.
 
 ## 들어 있는 것
 
