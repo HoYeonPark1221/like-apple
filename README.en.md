@@ -25,8 +25,11 @@ claude plugin install like-apple@like-apple
 There is nothing to invoke. When a screen feels a little less than Apple, just say so the way you normally would, and Claude reaches for the skill on its own.
 
 > The toggles in Settings feel a bit cheap. Refine them the way Apple would.
+>
 > I'd like this card to expand like the Dynamic Island.
+>
 > Hovering the pointer on iPad does nothing.
+>
 > It only feels out of place on the Mac.
 
 To call it directly: `/like-apple:like-apple`.

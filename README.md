@@ -7,6 +7,7 @@ SwiftUI 애니메이션, 크기(베젤·둥근 모서리·글자), 플랫폼 관
 
 > A Claude skill that makes native iOS, iPadOS and macOS apps look, move and feel like Apple made them —
 > Apple-style SwiftUI animation, sizing and platform behavior grounded in the Human Interface Guidelines.
+>
 > Written in Korean; Claude reads it fine in any language you talk to it in.
 
 ## 만든 배경 — Live Peninsula
@@ -26,8 +27,11 @@ claude plugin install like-apple@like-apple
 따로 불러낼 필요는 없습니다. 화면이 어딘가 Apple답지 않다고 느껴질 때, 평소 말하듯 이야기하면 Claude가 이 스킬을 꺼내 씁니다.
 
 > 설정 화면의 토글이 조금 가벼워 보여요. Apple처럼 다듬어 주세요.
+>
 > 이 카드가 Dynamic Island처럼 펼쳐졌으면 좋겠어요.
+>
 > iPad에서 포인터를 올려도 아무 반응이 없어요.
+>
 > Mac에서만 유독 겉도는 느낌이에요.
 
 직접 부르려면 `/like-apple:like-apple`.
