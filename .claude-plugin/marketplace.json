@@ -1,5 +1,5 @@
 {
-  "name": "apple-motion",
+  "name": "like-apple",
   "description": "Apple-style motion and HIG rules for native iOS, iPadOS and macOS apps",
   "owner": {
     "name": "HoYeon Park",
@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "apple-motion",
+      "name": "like-apple",
       "source": "./",
       "description": "Apple-style SwiftUI animation, sizing and platform behavior for iOS, iPadOS and macOS apps"
     }

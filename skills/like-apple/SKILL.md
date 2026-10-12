@@ -1,9 +1,9 @@
 ---
-name: apple-motion
+name: like-apple
 description: Make native APPS feel like Apple made them — Apple-style animation, sizing and platform behavior in SwiftUI for iOS, iPadOS and macOS, grounded in Apple's Human Interface Guidelines and distilled from building the Live Peninsula macOS notch app. Includes a catalog of Apple motion behaviors (Dynamic Island, pill HUD, genie, Liquid Glass morph, Siri glow, zoom transition, SF Symbol effects, number roll, sheet snapping, button press, countdown ring, reject shake) plus app-structure behavior (sheets, tab/navigation transitions, list insert/delete, loading, popover resize, iPad pointer effects); per-platform HIG rules (touch vs pointer vs keyboard, haptic patterns, size classes, Liquid Glass vs standard materials, component rules); Apple's spring system measured against the SDK; HIG-verified type sizes, control/bezel sizes and concentric corners; a drop-in AppleMotion.swift compile-checked on iOS 17/26 and macOS 14/26; and tools to MEASURE a reference recording. Use whenever the user builds or reviews a Swift/SwiftUI app UI and wants it to look, move or feel "like Apple" — "애플처럼/애플스럽게", "Dynamic Island처럼", "시스템 HUD처럼", "알람/타이머", "Liquid Glass", "스프링", "쫀득하게", "튕김", "전환", "햅틱", "동작 줄이기", "글자 크기", "베젤", "둥근 모서리", "여백", "아이패드 포인터", "맥에서 어색해", "HIG" — or says it feels cheap/janky/"구리다", even without naming Apple. Covers apps only: for websites/CSS/Framer Motion use apple-design; watchOS/visionOS/tvOS are out of scope.
 ---
 
-# Apple Motion — Apple의 애니메이션을 쉽게 만들기 (iOS · iPadOS · macOS)
+# Like Apple — Apple의 애니메이션을 쉽게 만들기 (iOS · iPadOS · macOS)
 
 "Dynamic Island처럼", "시스템 HUD처럼" 같은 요청을 받으면, 그 움직임이 **무엇으로 이루어졌는지** 분해해서 SwiftUI로 정확하게 옮긴다.
 애플스러운 움직임은 화려한 것이 아니라 **조용히 정확한 것**이고, 네 문장으로 줄어든다.

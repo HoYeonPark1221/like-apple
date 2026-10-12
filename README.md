@@ -1,4 +1,4 @@
-# Apple Motion — Claude Skill
+# Like Apple — Claude Skill
 
 **iOS · iPadOS · macOS 앱을 "Apple이 만든 것처럼" 움직이고 느껴지게 만드는 Claude 스킬.**
 SwiftUI 애니메이션, 크기(베젤·둥근 모서리·글자), 플랫폼 관례를 Apple Human Interface Guidelines를 근거로 맞춥니다.
@@ -17,20 +17,20 @@ SwiftUI 애니메이션, 크기(베젤·둥근 모서리·글자), 플랫폼 관
 ## 설치 (Claude Code)
 
 ```bash
-claude plugin marketplace add HoYeonPark1221/apple-motion
-claude plugin install apple-motion@apple-motion
+claude plugin marketplace add HoYeonPark1221/like-apple
+claude plugin install like-apple@like-apple
 ```
 
 설치 후에는 "애플처럼", "Dynamic Island처럼", "스프링이 구려", "Liquid Glass", "아이패드 포인터", "맥에서 어색해" 같은 말을 하면
-Claude가 알아서 스킬을 씁니다. 직접 부르려면 `/apple-motion:apple-motion`.
+Claude가 알아서 스킬을 씁니다. 직접 부르려면 `/like-apple:like-apple`.
 
 업데이트:
 
 ```bash
-claude plugin update apple-motion@apple-motion
+claude plugin update like-apple@like-apple
 ```
 
-플러그인 없이 쓰려면 `skills/apple-motion` 폴더를 `~/.claude/skills/`에 복사해도 됩니다.
+플러그인 없이 쓰려면 `skills/like-apple` 폴더를 `~/.claude/skills/`에 복사해도 됩니다.
 
 ## 들어 있는 것
 

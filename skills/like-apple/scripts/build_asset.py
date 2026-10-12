@@ -21,7 +21,7 @@ HEADER = """//
 //
 //  Apple식 애니메이션 도구 모음 (iOS 17 / iPadOS 17 / macOS 14 이상).
 //  macOS 노치 앱 Live Peninsula를 개발하며 다듬은 모션·크기 규칙을 일반화한 것이다.
-//  이 파일은 apple-motion 스킬의 references/recipes.md 에서 자동 생성된다 — 고칠 때는 레시피를 고치고 다시 만든다.
+//  이 파일은 like-apple 스킬의 references/recipes.md 에서 자동 생성된다 — 고칠 때는 레시피를 고치고 다시 만든다.
 //
 //  프로젝트에 이 파일 하나를 넣으면 아래를 바로 쓸 수 있다:
 //    Motion            모션 어휘 (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
