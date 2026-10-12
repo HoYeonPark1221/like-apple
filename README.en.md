@@ -22,17 +22,13 @@ claude plugin marketplace add HoYeonPark1221/like-apple
 claude plugin install like-apple@like-apple
 ```
 
-Nothing to invoke. When something feels a little off, just say so, and Claude will reach for the skill on its own.
+Usage is simple: tell Claude what to build and ask it to follow like-apple.
 
-> The button feels a little sluggish when I tap it.
->
-> The panel snaps shut too abruptly.
->
-> Something's off about the corners on this card.
->
-> When I let go of a drag, it flies off in a weird direction.
+```
+/like-apple:like-apple build a settings screen
+```
 
-To call it directly: `/like-apple:like-apple`.
+You can also skip the slash and just say "build it using like-apple".
 
 Update:
 

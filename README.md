@@ -24,17 +24,13 @@ claude plugin marketplace add HoYeonPark1221/like-apple
 claude plugin install like-apple@like-apple
 ```
 
-따로 부를 필요는 없습니다. 뭔가 어색하다 싶을 때 평소처럼 말하면 Claude가 알아서 이 스킬을 씁니다.
+사용법은 간단합니다. 만들고 싶은 것과 함께 like-apple을 참고하라고 말하면 됩니다.
 
-> 버튼 누를 때 반응이 좀 굼뜬 것 같아.
->
-> 패널 닫히는 게 너무 뚝 끊겨.
->
-> 카드 모서리가 뭔가 어색해 보여.
->
-> 드래그하다 놓으면 이상한 데로 튕겨 나가.
+```
+/like-apple:like-apple 참고해서 설정 화면 만들어줘
+```
 
-직접 부르려면 `/like-apple:like-apple`.
+슬래시 없이 "like-apple 참고해서 만들어줘"라고만 해도 됩니다.
 
 업데이트:
 
