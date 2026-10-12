@@ -1,5 +1,7 @@
 # Like Apple — Claude Skill
 
+**한국어** · [English](README.en.md)
+
 **iOS · iPadOS · macOS 앱을 "Apple이 만든 것처럼" 움직이고 느껴지게 만드는 Claude 스킬.**
 SwiftUI 애니메이션, 크기(베젤·둥근 모서리·글자), 플랫폼 관례를 Apple Human Interface Guidelines를 근거로 맞춥니다.
 
