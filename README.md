@@ -169,7 +169,6 @@ Apple 기기 화면을 녹화한 영상을 **프레임 단위로 펼쳐 보고**
 
 - **지금 지원:** iOS · iPadOS · macOS 앱
 - **앞으로:** visionOS, watchOS 등 다른 Apple 플랫폼으로 넓혀 갈 예정입니다.
-- 웹사이트는 다루지 않습니다. 웹은 [apple-design](https://github.com/emilkowalski/skills) 스킬을 참고하세요.
 - Claude Code에서 씁니다. `scripts/`의 측정·검증 도구는 macOS와 Xcode가 필요합니다.
 
 ## 고지

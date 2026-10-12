@@ -166,7 +166,6 @@ There's also a script that tells you how much a given spring overshoots and when
 
 - **Supported now:** iOS, iPadOS and macOS apps
 - **Coming next:** support for more Apple platforms, including visionOS and watchOS.
-- Websites are out of scope — for the web, see the [apple-design](https://github.com/emilkowalski/skills) skill.
 - Runs in Claude Code. The measurement and verification tools in `scripts/` need macOS and Xcode.
 
 ## Disclaimer
