@@ -22,15 +22,15 @@ claude plugin marketplace add HoYeonPark1221/like-apple
 claude plugin install like-apple@like-apple
 ```
 
-There is nothing to invoke. When a screen feels a little less than Apple, just say so the way you normally would, and Claude reaches for the skill on its own.
+Nothing to invoke. When something feels a little off, just say so, and Claude will reach for the skill on its own.
 
-> The button seems to answer a beat late when I press it.
+> The button feels a little sluggish when I tap it.
 >
-> The panel stops with a hard cut as it closes.
+> The panel snaps shut too abruptly.
 >
-> The inner corners of this card don't sit right against the outer ones.
+> Something's off about the corners on this card.
 >
-> When I let go of a drag, it flies off somewhere unexpected.
+> When I let go of a drag, it flies off in a weird direction.
 
 To call it directly: `/like-apple:like-apple`.
 
