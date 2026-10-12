@@ -2,7 +2,7 @@
 """references/recipes.md 의 ```swift 블록을 이어 붙여 assets/AppleMotion.swift 를 만든다.
 
 레시피의 단일 출처는 recipes.md 다. 코드를 고칠 때는 recipes.md 를 고친 뒤 이 스크립트를 다시 돌린다.
-그래야 문서와 복사해 쓰는 파일이 어긋나지 않는다.
+이 파일은 레시피 전체가 함께 컴파일되는지 검사하기 위한 것이다. 사용자 프로젝트에 통째로 복사하지 않는다.
 
     python3 scripts/build_asset.py            # 파일 생성
     python3 scripts/build_asset.py --check    # 생성 + macOS/iOS 타입체크(Swift 5·6)
@@ -23,7 +23,7 @@ HEADER = """//
 //  macOS 노치 앱 Live Peninsula를 개발하며 다듬은 모션·크기 규칙을 일반화한 것이다.
 //  이 파일은 like-apple 스킬의 references/recipes.md 에서 자동 생성된다 — 고칠 때는 레시피를 고치고 다시 만든다.
 //
-//  프로젝트에 이 파일 하나를 넣으면 아래를 바로 쓸 수 있다:
+//  검사용 묶음이다 — 사용자 프로젝트에는 필요한 레시피만 옮겨 쓴다. 들어 있는 것:
 //    Motion            모션 어휘 (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
 //    .motion(_:value:) 동작 줄이기를 자동으로 따르는 .animation
 //    PressableStyle    누르는 순간 반응하는 버튼

@@ -10,7 +10,7 @@
 
 **크기·글자·베젤·모서리**는 이 문서가 아니라 [metrics.md](metrics.md)를 본다(Apple 글자 크기, 컨트롤 규격, 동심 모서리).
 
-코드는 모두 `assets/AppleMotion.swift`(= `recipes.md`의 같은 번호)에 있다. 스프링 값의 의미는 [springs.md](springs.md).
+코드는 [recipes.md](recipes.md)의 같은 번호에 있다. 스프링 값의 의미는 [springs.md](springs.md).
 
 | 이렇게 말하면 | 항목 |
 | --- | --- |

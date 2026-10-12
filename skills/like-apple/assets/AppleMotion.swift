@@ -5,7 +5,7 @@
 //  macOS 노치 앱 Live Peninsula를 개발하며 다듬은 모션·크기 규칙을 일반화한 것이다.
 //  이 파일은 like-apple 스킬의 references/recipes.md 에서 자동 생성된다 — 고칠 때는 레시피를 고치고 다시 만든다.
 //
-//  프로젝트에 이 파일 하나를 넣으면 아래를 바로 쓸 수 있다:
+//  검사용 묶음이다 — 사용자 프로젝트에는 필요한 레시피만 옮겨 쓴다. 들어 있는 것:
 //    Motion            모션 어휘 (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
 //    .motion(_:value:) 동작 줄이기를 자동으로 따르는 .animation
 //    PressableStyle    누르는 순간 반응하는 버튼

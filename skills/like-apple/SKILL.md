@@ -1,6 +1,6 @@
 ---
 name: like-apple
-description: Make native APPS feel like Apple made them — Apple-style animation, sizing and platform behavior in SwiftUI for iOS, iPadOS and macOS, grounded in Apple's Human Interface Guidelines and distilled from building the Live Peninsula macOS notch app. Includes a catalog of Apple motion behaviors (Dynamic Island, pill HUD, genie, Liquid Glass morph, Siri glow, zoom transition, SF Symbol effects, number roll, sheet snapping, button press, countdown ring, reject shake) plus app-structure behavior (sheets, tab/navigation transitions, list insert/delete, loading, popover resize, iPad pointer effects); per-platform HIG rules (touch vs pointer vs keyboard, haptic patterns, size classes, Liquid Glass vs standard materials, component rules); Apple's spring system measured against the SDK; HIG-verified type sizes, control/bezel sizes and concentric corners; a drop-in AppleMotion.swift compile-checked on iOS 17/26 and macOS 14/26; and tools to MEASURE a reference recording. Use whenever the user builds or reviews a Swift/SwiftUI app UI and wants it to look, move or feel "like Apple" — "애플처럼/애플스럽게", "Dynamic Island처럼", "시스템 HUD처럼", "알람/타이머", "Liquid Glass", "스프링", "쫀득하게", "튕김", "전환", "햅틱", "동작 줄이기", "글자 크기", "베젤", "둥근 모서리", "여백", "아이패드 포인터", "맥에서 어색해", "HIG" — or says it feels cheap/janky/"구리다", even without naming Apple. Covers apps only: for websites/CSS/Framer Motion use apple-design; watchOS/visionOS/tvOS are out of scope.
+description: Make native APPS feel like Apple made them — Apple-style animation, sizing and platform behavior in SwiftUI for iOS, iPadOS and macOS, grounded in Apple's Human Interface Guidelines and distilled from building the Live Peninsula macOS notch app. Includes a catalog of Apple motion behaviors (Dynamic Island, pill HUD, genie, Liquid Glass morph, Siri glow, zoom transition, SF Symbol effects, number roll, sheet snapping, button press, countdown ring, reject shake) plus app-structure behavior (sheets, tab/navigation transitions, list insert/delete, loading, popover resize, iPad pointer effects); per-platform HIG rules (touch vs pointer vs keyboard, haptic patterns, size classes, Liquid Glass vs standard materials, component rules); Apple's spring system measured against the SDK; HIG-verified type sizes, control/bezel sizes and concentric corners; 29 code recipes compile-checked on iOS 17/26 and macOS 14/26 (written into the user's code only as needed, never dropped in as a whole file); and tools to MEASURE a reference recording. Use whenever the user builds or reviews a Swift/SwiftUI app UI and wants it to look, move or feel "like Apple" — "애플처럼/애플스럽게", "Dynamic Island처럼", "시스템 HUD처럼", "알람/타이머", "Liquid Glass", "스프링", "쫀득하게", "튕김", "전환", "햅틱", "동작 줄이기", "글자 크기", "베젤", "둥근 모서리", "여백", "아이패드 포인터", "맥에서 어색해", "HIG" — or says it feels cheap/janky/"구리다", even without naming Apple. Covers apps only: for websites/CSS/Framer Motion use apple-design; watchOS/visionOS/tvOS are out of scope.
 ---
 
 # Like Apple — Apple의 애니메이션을 쉽게 만들기 (iOS · iPadOS · macOS)
@@ -28,7 +28,7 @@ description: Make native APPS feel like Apple made them — Apple-style animatio
 | | 내용 | 파일 |
 | --- | --- | --- |
 | **카탈로그** | Apple 동작 25개(앱 구조 포함)를 재료로 분해 + 구현 + 근거 등급. 먼저 여기서 찾는다 | [references/catalog.md](references/catalog.md) |
-| **복사해 쓰는 코드** | 프로젝트에 넣는 한 파일. 레시피 29개, macOS 14/26 · iOS 17/26 × Swift 5/6에서 컴파일 검증 | [assets/AppleMotion.swift](assets/AppleMotion.swift) (설명: [references/recipes.md](references/recipes.md)) |
+| **코드 레시피** | 바로 쓸 수 있는 레시피 29개. 참고해서 필요한 부분만 쓴다 | [references/recipes.md](references/recipes.md) (검사용 묶음: `assets/AppleMotion.swift` — macOS 14/26 · iOS 17/26 × Swift 5/6 컴파일 검증, 사용자 프로젝트에 복사하지 않는다) |
 | **스프링 이해** | Apple 프리셋, 감쇠비 ↔ bounce, 오버슈트·정착 시간 | [references/springs.md](references/springs.md), `scripts/spring_probe.sh` |
 | **플랫폼·앱 구조 (HIG)** | iOS · iPadOS · macOS의 입력·햅틱·레이아웃·재질 차이, 시트·탭 바·툴바·팝오버·알림·목록·진행 표시의 HIG 규칙 | [references/platforms.md](references/platforms.md) |
 | **크기·글자·베젤** | Apple 글자 크기(iOS/macOS 22개 SDK 검증), 컨트롤·베젤 규격, 동심 모서리, Live Peninsula의 현재 크기 감사 | [references/metrics.md](references/metrics.md) |
@@ -58,7 +58,9 @@ description: Make native APPS feel like Apple made them — Apple-style animatio
 3. **스프링을 고른다.** [springs.md §4](references/springs.md)의 질문 순서로 `Motion` 어휘를 고른다. 값이 의심되면 숫자를 짐작하지 말고
    `scripts/spring_probe.sh <response> <ζ>`로 오버슈트를 잰다.
    글자·컨트롤·여백·모서리 **크기**도 Apple 규격으로 정한다 — [metrics.md](references/metrics.md) (`.font(.body)` 같은 스타일, `.appleHitTarget()`, 동심 모서리).
-4. **코드를 넣는다.** 프로젝트에 `AppleMotion.swift`가 없으면 `assets/`에서 복사해 필요한 조각을 쓴다(이름이 겹치면 접두어를 붙인다).
+4. **코드를 쓴다.** [recipes.md](references/recipes.md)에서 맞는 레시피를 찾아 출발점으로 삼고, **그 프로젝트의 코드 스타일·이름·구조에 맞게 필요한 부분만** 직접 쓴다.
+   `assets/AppleMotion.swift`를 통째로 복사하지 않는다 — 그 파일은 레시피가 컴파일되는지 검사하는 용도다. 통째로 넣는 건 사용자가 원할 때만.
+   프로젝트에 이미 비슷한 것(`Motion` 같은 이름표, 버튼 스타일)이 있으면 새로 만들지 말고 그것을 쓰거나 고친다.
    있으면 그것을 쓴다. 레시피 코드를 바꿀 때는 `recipes.md`를 고치고 `python3 scripts/build_asset.py --check`로 파일을 다시 만든다(문서와 파일이 어긋나지 않게).
 5. **솔직하게 말한다.** 등급이 [앱]인 동작은 근사라고 밝힌다. 사용자가 "Apple 값"을 물으면 [SDK]로 측정한 값과 [앱] 근사를 구분해서 답한다.
 6. **눈으로 확인한다.** 컴파일 통과는 보이는 모양을 보장하지 않는다. 시뮬레이터에서 녹화해 `filmstrip.sh`로 프레임을 펼쳐 보고,
@@ -217,7 +219,7 @@ Liquid Glass는 **콘텐츠 위에 떠 있는 기능 층**(툴바, 탭 바, 사�
 
 ## 4. 모션 어휘
 
-`assets/AppleMotion.swift`의 `Motion` enum과 같은 표다. **Apple 프리셋 이름**으로 쓰고, 각 값의 오버슈트·정착 시간은
+recipes §1의 `Motion` enum과 같은 표다. **Apple 프리셋 이름**으로 쓰고, 각 값의 오버슈트·정착 시간은
 [springs.md](references/springs.md)에 측정해 두었다. (`.snappy(duration: 0.42)`는 `.spring(response: 0.42, dampingFraction: 0.85)`와 곡선이 비트 단위로 같다 [SDK].)
 
 | 이름 | Apple 표기 | 쓰임 |

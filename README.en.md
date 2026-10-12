@@ -59,7 +59,7 @@ claude plugin update like-apple@like-apple
 | --- | --- |
 | **15 principles** | Critical damping by default, entrances and exits keep different time, everything is interruptible, hand off the finger's velocity, materials separate layers, fit the platform's input … |
 | **25-entry motion catalog** | Dynamic Island, pill HUD, genie, Liquid Glass merge, Siri glow, zoom transition, rolling numbers, timer ring, sheets, pointer effects, reject shake … — each with an evidence grade ([Apple] · [HIG] · [SDK] · [App]) |
-| **`AppleMotion.swift`** | One drop-in file with 29 recipes, compile-checked on iOS 17/26 and macOS 14/26 in both Swift 5 and Swift 6 modes |
+| **29 code recipes** | Ready-to-use SwiftUI code, compile-checked on iOS 17/26 and macOS 14/26 in both Swift 5 and Swift 6 modes. Only what's needed goes into your project, written to match your code style |
 | **Platform HIG** | How iPhone (touch), iPad (touch + pointer) and Mac (pointer + keyboard) differ in input, haptics, layout and materials; HIG rules for sheets, tab bars, toolbars, popovers, alerts, lists and progress indicators |
 | **Metrics** | Apple type sizes (verified against the SDK), control and bezel sizes, concentric corners |
 | **Measurement tools** | Scripts that unroll a reference recording into frames, track the motion and fit spring values to it |
