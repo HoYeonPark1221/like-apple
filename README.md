@@ -23,8 +23,14 @@ claude plugin marketplace add HoYeonPark1221/like-apple
 claude plugin install like-apple@like-apple
 ```
 
-설치 후에는 "애플처럼", "Dynamic Island처럼", "스프링이 구려", "Liquid Glass", "아이패드 포인터", "맥에서 어색해" 같은 말을 하면
-Claude가 알아서 스킬을 씁니다. 직접 부르려면 `/like-apple:like-apple`.
+따로 불러낼 필요는 없습니다. 화면이 어딘가 Apple답지 않다고 느껴질 때, 평소 말하듯 이야기하면 Claude가 이 스킬을 꺼내 씁니다.
+
+> 설정 화면의 토글이 조금 가벼워 보여요. Apple처럼 다듬어 주세요.
+> 이 카드가 Dynamic Island처럼 펼쳐졌으면 좋겠어요.
+> iPad에서 포인터를 올려도 아무 반응이 없어요.
+> Mac에서만 유독 겉도는 느낌이에요.
+
+직접 부르려면 `/like-apple:like-apple`.
 
 업데이트:
 
