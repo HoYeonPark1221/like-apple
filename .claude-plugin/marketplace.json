@@ -1,0 +1,15 @@
+{
+  "name": "apple-motion",
+  "description": "Apple-style motion and HIG rules for native iOS, iPadOS and macOS apps",
+  "owner": {
+    "name": "HoYeon Park",
+    "url": "https://github.com/HoYeonPark1221"
+  },
+  "plugins": [
+    {
+      "name": "apple-motion",
+      "source": "./",
+      "description": "Apple-style SwiftUI animation, sizing and platform behavior for iOS, iPadOS and macOS apps"
+    }
+  ]
+}
