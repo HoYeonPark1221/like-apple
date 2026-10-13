@@ -1,6 +1,6 @@
 ---
 name: like-apple
-description: Make native APPS feel like Apple made them — Apple-style animation, sizing and platform behavior in SwiftUI for iOS, iPadOS and macOS, grounded in Apple's Human Interface Guidelines and distilled from building the Live Peninsula macOS notch app. Includes a catalog of Apple motion behaviors (Dynamic Island, pill HUD, genie, Liquid Glass morph, Siri glow, zoom transition, SF Symbol effects, number roll, sheet snapping, button press, countdown ring, reject shake) plus app-structure behavior (sheets, tab/navigation transitions, list insert/delete, loading, popover resize, iPad pointer effects); per-platform HIG rules (touch vs pointer vs keyboard, haptic patterns, size classes, Liquid Glass vs standard materials, component rules); Apple's spring system measured against the SDK; HIG-verified type sizes, control/bezel sizes and concentric corners; 29 code recipes compile-checked on iOS 17/26 and macOS 14/26 (written into the user's code only as needed, never dropped in as a whole file); and tools to MEASURE a reference recording. Use whenever the user builds or reviews a Swift/SwiftUI app UI and wants it to look, move or feel "like Apple" — "애플처럼/애플스럽게", "Dynamic Island처럼", "시스템 HUD처럼", "알람/타이머", "Liquid Glass", "스프링", "쫀득하게", "튕김", "전환", "햅틱", "동작 줄이기", "글자 크기", "베젤", "둥근 모서리", "여백", "아이패드 포인터", "맥에서 어색해", "HIG" — or says it feels cheap/janky/"구리다", even without naming Apple. Covers native apps on iOS, iPadOS and macOS for now; watchOS, visionOS and tvOS are not covered yet.
+description: Make SwiftUI apps on iOS, iPadOS and macOS move and feel like Apple made them — springs, press and hover feedback, drag-and-release, enter/exit timing, Liquid Glass, haptics, Reduce Motion, bezel and corner sizing — grounded in Apple's HIG and SDK measurements and distilled from building the Live Peninsula notch app. Includes a catalog of Apple motions, 29 compile-checked recipes and tools to measure a reference recording. Use when building or reviewing Swift/SwiftUI UI that should feel Apple-like, or when motion feels cheap or janky — "애플처럼", "애플스럽게", "Dynamic Island처럼", "스프링", "쫀득하게", "튕김", "구리다". Native apps only; not watchOS, visionOS or tvOS yet.
 ---
 
 # Like Apple — Apple-style motion for iOS · iPadOS · macOS apps
@@ -17,11 +17,8 @@ Apple-like motion is not flashy; it is **quietly precise**, and it reduces to fo
 Beyond motion, match **sizing (bezels, rounded corners, type) and platform conventions (input method, haptics, materials, system components)** to Apple's HIG —
 motion can be perfect and the app still won't feel like Apple if the iPad pointer gets no response or the Mac has no hover.
 
-**Origin: Live Peninsula.** This skill is the result of building **Live Peninsula**, a macOS notch app, as a solo developer. To keep that app's philosophy — Apple-like motion,
-rounded bezels and concentric corners, quietly precise movement like the system's — the notch's open/close spring, the hotkey HUD, files dragged into the tray,
-the lock-screen music card and the studio timer ruler were built and rebuilt over and over: "it used to be like this; here's why it changed."
-The principles in §3 (P1–P13) and every value graded [App] came from that process; the source file for each rule is in [evidence.md](references/evidence.md).
-Apple's HIG and SDK measurements were layered on top so the same feel can be reached in any iOS · iPadOS · macOS app, not just Live Peninsula.
+**Origin: Live Peninsula.** Distilled from building **Live Peninsula**, a macOS notch app, where every motion value was tuned and re-tuned with the reason recorded in code.
+P1–P13 and every [App]-graded value come from there (sources per rule: [evidence.md](references/evidence.md)); HIG and SDK measurements generalize them to any iOS · iPadOS · macOS app.
 
 > The reference files are written in Korean; read them as-is. In them the [App] grade is written **[앱]**.
 
@@ -35,6 +32,7 @@ Apple's HIG and SDK measurements were layered on top so the same feel can be rea
 | **Platforms & app structure (HIG)** | iOS · iPadOS · macOS differences in input, haptics, layout and materials; HIG rules for sheets, tab bars, toolbars, popovers, alerts, lists, progress | [references/platforms.md](references/platforms.md) |
 | **Sizes, type, bezels** | Apple type sizes (22 values SDK-verified for iOS/macOS), control/bezel sizes, concentric corners, Live Peninsula's current size audit | [references/metrics.md](references/metrics.md) |
 | **Reference measurement** | Record an Apple device → view frames → numbers → spring fit (with ranges). Accuracy verified | [references/measurement.md](references/measurement.md), `scripts/filmstrip.sh` `track_video.sh` `fit_spring.py` |
+| **Tools & fixes** | Which SwiftUI API for which motion, the full per-platform table, and 30 symptom → cause → fix entries | [references/tools-and-fixes.md](references/tools-and-fixes.md) |
 | **Evidence** | Which Live Peninsula file or bug each rule came from | [references/evidence.md](references/evidence.md) |
 
 **Evidence grades** — never mix them. **[Apple]** guaranteed by official APIs, sessions or HIG · **[SDK]** measured on this Mac's SDK ·
@@ -70,20 +68,15 @@ say "this is a close reproduction" and never pretend to know Apple's values.
 
 ## 2. Apple's official motion principles (HIG)
 
-A summary of [developer.apple.com/design/human-interface-guidelines/motion](https://developer.apple.com/design/human-interface-guidelines/motion).
-
-- **Purposeful.** Motion supports the experience without overshadowing it. Motion for its own sake distracts and causes discomfort.
-- **Optional.** Never convey important information through motion alone. Supplement with haptics and sound.
-- **Realistic.** Follow gestures and expectations. Unrealistic motion disorients.
-- **Brief and precise.** Light, unobtrusive animation communicates better.
-- **No added motion on frequent interactions.** Standard elements already have subtle system motion. Let people cancel; don't make them wait on repeated interactions.
-- **For people with Reduce Motion on [HIG Accessibility]:** reduce automatic and repeating animation (zoom, scaling, peripheral motion), **tone down spring bounce**, keep animation tied directly to gestures,
-  don't animate z-axis depth changes, **replace x/y/z movement transitions with fades, and avoid animating blur in and out.**
-- **Interruptible.** Don't make people wait for an animation to finish — especially one they see repeatedly. (→ P4)
-- **Use animated symbols where they fit.** SF Symbols 5+ symbol animation (`symbolEffect`) comes before hand-made rotation or scaling.
-- **Intensity depends on input.** Liquid Glass reacts more strongly to direct touch to feel tactile, and more calmly to a trackpad. (→ P15)
-- **Be careful with fast-moving or blinking animation** [HIG Accessibility] — it can cause dizziness and, in severe cases, seizures. Endless glows and meshes stay slow and faint, and stop under Reduce Motion.
-- **Minimize time-boxed elements** [HIG Accessibility] — never put important information or the only path to an action in a HUD or toast that disappears on its own.
+From [HIG Motion](https://developer.apple.com/design/human-interface-guidelines/motion) and HIG Accessibility:
+- **Purposeful, brief, precise, realistic** — motion supports the experience; it follows gestures and expectations; never motion for its own sake.
+- **Optional** — never the only carrier of important information; pair with haptics or sound.
+- **No added motion on frequent interactions**, and let people **cancel** — never make them wait on something they see repeatedly (→ P4).
+- **Animated SF Symbols** (`symbolEffect`) before hand-made rotation or scaling.
+- **Intensity follows input** — Liquid Glass reacts strongly to touch, calmly to a trackpad (→ P15).
+- **Reduce Motion**: cut automatic/repeating motion, tone down bounce, no z-depth animation, x/y/z moves become fades, no blur in/out (→ P11).
+- **Avoid fast or blinking motion** (dizziness, seizures); keep endless glows slow and faint.
+- **Minimize time-boxed elements** — nothing important or the only path to an action in a HUD or toast that disappears on its own.
 
 ---
 
@@ -245,38 +238,9 @@ measured in [springs.md](references/springs.md). (`.snappy(duration: 0.42)` is b
 
 ## 5. Choosing the tool
 
-| Goal | Use | Notes |
-| --- | --- | --- |
-| Smooth change when a value changes | `.animation(curve, value:)` | Applies to properties attached **above** the modifier. Put it *after* what it animates |
-| Several state changes from an event handler | `withAnimation(curve) { ... }` | |
-| Values changed outside `withAnimation`, e.g. timer callbacks | `.animation(curve, value:)` on the observing side | Attach it where the value is observed, not where it's set, or the transition won't run |
-| Instant follow during drag | `withTransaction(Transaction(animation: nil))` | 1:1 |
-| A different curve in one spot | `.transaction(value:) { t in t.animation = ... }` | e.g. linear only while locked, untouched otherwise |
-| Numbers | `.contentTransition(.numericText(countsDown:))` + `.monospacedDigit()` | No sideways jitter when digit count changes |
-| Flip an icon's state | `.contentTransition(.symbolEffect(.replace))` | iOS 18 / macOS 15: `.replace.magic(fallback:)` — guard with `#available` |
-| One-off emphasis | `.symbolEffect(.bounce.down, value: count)` | Fix the value under Reduce Motion |
-| Continuous value → many segments | `Animatable` + `Canvas` | recipes §7 |
-| Appear/fold progress | `Animatable` `ViewModifier` (progress 0→1), view always mounted | recipes §6 |
-| Paging | `.scrollTargetBehavior(.paging)` + `.scrollTransition(.interactive)` | recipes §12 |
-| Landing that carries hand velocity | `.interpolatingSpring(mass:stiffness:damping:initialVelocity:)` | `.spring()` has no initial-velocity parameter |
-| Insert/remove a view | `.transition(.asymmetric(...))` | Only where interruption can't happen |
-| Per-frame updates | `TimelineView(.animation(minimumInterval:))` | 30fps was enough for progress bars |
-| Repeating/delayed work | `.task { while !Task.isCancelled { ... } }` | Recursive `DispatchQueue` keeps running after the view is gone |
-| Observing a value that changes every frame | Confine observation **inside** the modifier | Observing outside redraws the whole card every frame |
-| Liquid Glass merging and splitting | `GlassEffectContainer` + `.glassEffectID(_:in:)` + `withAnimation(Motion.morph)` | recipes §14. Nearby glass must share a container |
-| Opening like an app zooming in | `.matchedTransitionSource` + `.navigationTransition(.zoom(sourceID:in:))` | recipes §21. iOS 18 |
-| A single "pop" | `keyframeAnimator(initialValue:trigger:)` + `SpringKeyframe` | recipes §16 |
-| Doing something when an animation finishes | `withAnimation(_, completionCriteria: .logicallyComplete) { } completion: { }` | Don't guess time with `asyncAfter`. Fires when perceived duration ends |
-| Replacing content with a blur | `.transition(.blurReplace)` | recipes §17 |
-| Icon pop / pulse / wiggle | `.symbolEffect(.bounce / .pulse / .variableColor / .wiggle …)` | recipes §15. Look here before rotating things by hand |
-| Endless glow or mesh | `repeatForever` at **different periods**; stop under `reduceMotion` | recipes §19·§20 |
-| iPad pointer hover | `.hoverEffect(.highlight / .lift)` + `.contentShape(.hoverEffect, shape)` | recipes §24. macOS: `.onHover` brightness |
-| Sheet size and dismissal | `.presentationDetents` · `.presentationDragIndicator(.visible)` · `.interactiveDismissDisabled(hasChanges)` | recipes §26. Never hand-build sheet dragging |
-| Re-layout for large text or narrow windows | `AnyLayout(HStackLayout / VStackLayout)` + `.motion(Motion.settle, value:)` | recipes §27. Don't swap stacks with `if` |
-| Separating content under a toolbar | `.scrollEdgeEffectStyle(.soft, for: .top)` (iOS 26 / macOS 26) | recipes §28. No background colors |
-| Emphasizing the one key action | `.buttonStyle(.glassProminent)` (26) · `.borderedProminent` below that | Only one, trailing |
-| Rejecting input | `.rejectShake(trigger:)` (`keyframeAnimator`) + `Haptics.play(meaning: .failure)` | recipes §29 |
-| List insert/delete/move | Change data inside `withAnimation`, use `onDelete` · `onMove` | No per-row `.transition` |
+Which SwiftUI API to use for each kind of motion (`.animation` vs `withAnimation`, drags, numbers, symbols, paging, glass, zoom, sheets, layout changes, rejection, lists) is a lookup table in [tools-and-fixes.md §1](references/tools-and-fixes.md). Two rules that matter most:
+- `.animation(curve, value:)` applies to properties **above** it — put it after what it animates, and attach it where the value is *observed* (values changed outside `withAnimation` won't animate otherwise).
+- A landing that carries hand velocity needs `.interpolatingSpring(...initialVelocity:)`; `.spring()` has no initial-velocity parameter.
 
 ---
 
@@ -284,21 +248,7 @@ measured in [springs.md](references/springs.md). (`.snappy(duration: 0.42)` is b
 
 Motion rules are identical across the three platforms. What differs is **input**, **haptics**, **space** and minimum OS (P15). HIG basis and per-component rules: [platforms.md](references/platforms.md).
 
-| | iOS | iPadOS | macOS |
-| --- | --- | --- | --- |
-| Input | Finger, direct manipulation | Finger + pointer + keyboard | Pointer / trackpad |
-| Hover | None (`.onHover` simply never fires; harmless) | `.onHover` / `.hoverEffect` with a pointer | **Required** — say "here" before the click |
-| Horizontal swipe | Both `DragGesture` and scroll | Same | Two-finger swipes are *scroll events* → never reach `DragGesture`. Use `ScrollView` paging |
-| Haptics | `.sensoryFeedback` (17+) or `UIFeedbackGenerator` | Most have no haptic engine — supplementary only | `.sensoryFeedback` compiles but is mostly **silent** (confirmed in Live Peninsula). Use `NSHapticFeedbackManager` (recipes §13) |
-| Size | Fixed screen | Variable via Split View / Stage Manager — never assume fixed pt | Resizable windows |
-| Press scale | 0.94–0.97 | Same | Same + hover brightness |
-| Pointer effects | — | highlight (small, transparent background) · lift (small, opaque) · hover (large; tint instead of scale) — recipes §24 | Hover brightness + system cursors (`.pointerStyle`, macOS 15+) |
-| Haptic meanings | notification (outcome) · impact (snap, collision) · selection (value change) | Mostly none | alignment · levelChange · generic, **only during drag or force click** — recipes §25 |
-| Layout decisions | Size class + text size | Size class (windows change constantly) + text size | No size class — window width (`ViewThatFits`) + text size |
-| Modals | Sheet with medium detent + grabber, swipe to dismiss | Page/form sheets; fewer modals and full-screen transitions | Fixed-size sheets, panels for repeated input. Other windows stay usable |
-| Popovers | Not in compact → sheet | Only when wide | Detachable into a panel |
-| Placement | Frequent controls in the reachable bottom/middle | Window controls must not cover leading toolbar buttons | Nothing important at the window bottom or behind the notch. Every command also in the menu bar |
-| Liquid Glass response | Direct touch — strong | Strong for touch, calm for pointer | Trackpad — calm |
+The full per-platform table (input, hover, swipes, haptics, size, pointer effects, layout, modals, popovers, placement, Liquid Glass response) is in [tools-and-fixes.md §2](references/tools-and-fixes.md).
 
 **Minimum OS** (lower bounds confirmed by recipe typechecks): `.numericText`, `.smooth`, `.symbolEffect`, `scrollTransition`, `.transaction(value:)`,
 `scrollTargetBehavior` → **iOS 17 / macOS 14**. `Image(systemName:variableValue:)` → iOS 16 / macOS 13.
@@ -311,75 +261,25 @@ Split shared code with `#if os(macOS)` / `#elseif canImport(UIKit)` (see `Haptic
 
 ## 7. Symptom → cause → fix
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| Jumps on open/close | Damping 0.68 → 5% overshoot | 0.85 (overshoot <1%) |
-| Icon flickers while a key is held | Symbol name swapped per value range | `variableValue` / `Animatable` + damping 1.0 |
-| Text gets clipped by corners as the container folds | Content disappears later than the container | Exit faster than the container (0.13) |
-| Swipe animation feels cheap | Native paging + manual settle spring on different beats | Keep only one |
-| Flings away after a long pause before release | `DragGesture.velocity` keeps the last movement speed | Compute from the last 0.1s before release |
-| Grabbing a moving ruler teleports it | Starts from the target value | Record the drawn value and start from there |
-| UI freezes under rapid taps | Stacked `.transition` insert/remove + large blur | State-driven (always mounted) + shallower blur |
-| Ruler/ring wobbles every second | Spring on a countdown | `linear(1)` |
-| Press feels sluggish | Same curve for press and release | Press `easeOut 0.07` / release spring |
-| Pressed button looks switched off | Press shown with `opacity` | `brightness(-0.07)` |
-| Numbers jitter at two digits | Not fixed-width | `.monospacedDigit()` |
-| Text slides and clips in a narrow column | `move` transition | `.contentTransition(.opacity)` |
-| A view hidden with opacity still catches hover/drops | `opacity 0` doesn't disable hit-testing | Add `allowsHitTesting(!hidden)` |
-| Animation keeps running after the view is gone | Self-calling `DispatchQueue.asyncAfter` | `.task` (cancels automatically) |
-| The whole card redraws every frame | Per-frame value observed outside | Confine observation inside the modifier |
-| No haptics felt on macOS | `.sensoryFeedback` is silent on Mac | `NSHapticFeedbackManager` |
-| Still moves with Reduce Motion on | Curve changed but transforms (offset/scale) kept | Pin the transform values themselves to 0/1 |
-| No response when the iPad pointer hovers | Custom button has no pointer effect | `.hoverEffect(.highlight / .lift)` (recipes §24) |
-| Pointer flickers between bar buttons | Gaps between hit areas | Make hit areas contiguous |
-| Hovered table row overlaps its neighbor | Scaling an adjacent element | Tint only (`.hover`) |
-| Large text clips or overlaps rows | Fixed height, horizontal layout | Switch to vertical with `AnyLayout`, automatic row height (recipes §27) |
-| Layout snaps when it changes | HStack/VStack swapped with `if` | `AnyLayout` + one shared spring |
-| Area under the toolbar looks muddy and heavy | Background color/blur laid under the toolbar | Remove it; use a scroll edge effect (recipes §28) |
-| Everything is glass and it's distracting | Glass on the content layer and many custom controls | Glass on the functional layer only; standard materials for content (P14) |
-| Swiping a sheet closed lost unsaved work | Unsaved changes not protected | `interactiveDismissDisabled(hasChanges)` + confirm (recipes §26) |
-| Sheet drag feels subtly unlike the system | Sheet was hand-built | System sheet via `presentationDetents` (P8) |
-| A resizing popover looks like a different window | Size change not animated | Animate the size with `Motion.morph` (catalog 25) |
-| Pressing does nothing and feels broken | Rejection/disabled state not shown | Dim disabled controls up front; `rejectShake` for rejection (recipes §29) |
-| Looks frozen while loading | Indicator stopped, or spinner↔bar switch | A constantly moving, preferably determinate indicator (catalog 24) |
-| HUD disappears before it can be read | Important info in a time-boxed element | Keep important info on screen; stay longer under VoiceOver (platforms §7) |
+When the user describes a symptom ("it jumps", "feels cheap", "text gets clipped", "flings away", "freezes on rapid taps", "no response on iPad hover"…), look it up in [tools-and-fixes.md §3](references/tools-and-fixes.md) — 30 symptoms with cause and fix, most traced to a real Live Peninsula bug.
 
 ---
 
 ## 8. Finishing checklist
 
-Skimming this while writing or reviewing code catches most problems.
+- [ ] The motion's information fits in one line; the curve comes from §4, and any new number has a comment saying why.
+- [ ] Damping 1.0 for state changes and inertia-free input; any bounce has a source of momentum (P1).
+- [ ] Press/release and enter/exit keep different time; properties moving together share one spring (P2, P3).
+- [ ] Survives rapid taps and mid-motion grabs; values flow instead of jumping (P4, P5).
+- [ ] Drags are 1:1, carry release velocity and rubber-band at the edges (P7).
+- [ ] Nothing the system does was rebuilt (detents, paging, numericText, symbolEffect, glassEffectID, zoom); system components follow [platforms.md §6](references/platforms.md) (P8).
+- [ ] [Apple]/[SDK] facts and [App] approximations kept apart.
+- [ ] Reduce Motion keeps the information (transforms removed, fades instead); Reduce Transparency and contrast checked (P11).
+- [ ] Haptics only at detents, by HIG meaning, same frame as the visual; `NSHapticFeedbackManager` on macOS; optional.
+- [ ] Semantic text styles, hit areas at spec (iOS 44 / macOS 28pt), concentric nested corners ([metrics.md](references/metrics.md)).
+- [ ] Liquid Glass only on the functional layer, used sparingly (P14).
+- [ ] Checked per platform — touch on iPhone, pointer and resizable windows on iPad, hover, cursors and menu bar on Mac (P15).
+- [ ] Holds at the largest text size and window extremes; unavailable actions look unavailable; nothing important in self-dismissing elements.
+- [ ] Repeating work in `.task`; decoration `allowsHitTesting(false)`; blurs short and shallow; accessibility labels set.
 
-- [ ] I can state in one line what information this motion carries.
-- [ ] The curve comes from the §4 vocabulary; any new number has a comment explaining why.
-- [ ] State changes and inertia-free input use damping 1.0. Any elasticity has a *source of momentum*.
-- [ ] Press/release and enter/exit keep different time.
-- [ ] Properties that move together share one spring. The same thing isn't animated in two places.
-- [ ] Doesn't break under rapid taps or mid-motion grabs (state-driven, starts from the visible value).
-- [ ] Values flow instead of jumping between ranges (`variableValue` / `Animatable` / `numericText`).
-- [ ] Drags are 1:1, carry release velocity, and rubber-band at the edges.
-- [ ] Nothing the system already does was rebuilt (sheet detents, paging, numericText, symbolEffect, glassEffectID, zoom transition).
-- [ ] No motion added to frequent interactions (a held key) — the value flows and it appears once.
-- [ ] [Apple] and [App] approximations were kept apart. No pretending to know private implementations.
-- [ ] Information survives Reduce Motion (transforms removed, fade/brightness instead). Reduce Transparency and contrast settings checked too.
-- [ ] Haptics only at meaningful moments (detents), same frame as the visual change. `NSHapticFeedbackManager` on macOS.
-- [ ] Large blurs are short and shallow. Observation of per-frame values is narrowed.
-- [ ] Text uses semantic styles (`.font(.body)` etc.) or Apple style sizes, and never goes below the minimum (iOS 11 / macOS 10pt).
-- [ ] Control hit areas meet spec (iOS 44 / macOS 28pt; minimum 28 / 20). Nested rounded shapes are concentric (`outer − inset`).
-- [ ] Repeating work uses `.task`. Decoration has `allowsHitTesting(false)`. Accessibility labels/values are set.
-- [ ] Checked **per target platform**: touch and haptics on iPhone, pointer effects and variable windows on iPad, hover, cursors and the menu bar on Mac (P15).
-- [ ] System components (sheets, tab bars, navigation, lists, popovers) are configured per HIG, not hand-built ([platforms.md §6](references/platforms.md)).
-- [ ] Liquid Glass only on the functional layer, used sparingly. Standard materials for content. No background color under bars (P14).
-- [ ] Haptics follow HIG pattern **meanings** and don't double up on standard controls. They can be turned off and the app is whole without them.
-- [ ] Layout holds at the largest text size and the smallest and largest windows, and positions flow when it changes.
-- [ ] Unavailable actions look unavailable (dimmed disabled, reject shake). Nothing important lives in elements that disappear on their own.
-
-### Auditing existing code
-
-```bash
-# Curve kinds and frequency — check whether values for the same intent are scattered
-grep -rhoE '\.(spring|smooth|snappy|easeInOut|easeOut|easeIn|linear)\([^)]*\)' --include='*.swift' . | sort | uniq -c | sort -rn | head -30
-
-# Files that animate but never read Reduce Motion
-comm -23 <(grep -rlE --include='*.swift' 'withAnimation|\.animation\(' . | sort) <(grep -rl --include='*.swift' 'accessibilityReduceMotion' . | sort)
-```
+To audit an existing codebase (scattered curves, files that never read Reduce Motion), use the commands in [tools-and-fixes.md §4](references/tools-and-fixes.md).
