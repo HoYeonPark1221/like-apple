@@ -1,7 +1,7 @@
 {
   "name": "like-apple",
   "displayName": "Like Apple",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Make iOS, iPadOS and macOS apps look, move and feel like Apple made them — Apple-style SwiftUI animation, sizing and platform behavior grounded in the Human Interface Guidelines, distilled from building the Live Peninsula macOS notch app.",
   "author": {
     "name": "HoYeon Park",
