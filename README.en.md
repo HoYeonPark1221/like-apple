@@ -72,9 +72,32 @@ Now Claude picks values by the same standard when it builds your animations.
 
 ## 2. Install (Claude Code)
 
-Pick one of two ways.
+### 2.1 Plugin install (recommended) — automatic updates
 
-### 2.1 Simple install — `/like-apple`
+```bash
+claude plugin marketplace add HoYeonPark1221/like-apple
+claude plugin install like-apple@like-apple
+```
+
+**Turn on auto-update** — do this once and new versions arrive on their own.
+
+1. In Claude Code, type `/plugin`
+2. Go to **Marketplaces** → select **like-apple**
+3. Select **Enable auto-update**
+
+Usage:
+
+```
+/like-apple:like-apple build it using this
+```
+
+Plugin skills are prefixed with the plugin name. Without auto-update, pull a new version yourself:
+
+```bash
+claude plugin update like-apple@like-apple
+```
+
+### 2.2 Simple install — `/like-apple`
 
 ```bash
 git clone https://github.com/HoYeonPark1221/like-apple.git
@@ -87,26 +110,7 @@ Usage:
 /like-apple build it using this
 ```
 
-To update, run `git pull` in the `like-apple` folder and repeat the `cp` command.
-
-### 2.2 Plugin install — easier updates
-
-```bash
-claude plugin marketplace add HoYeonPark1221/like-apple
-claude plugin install like-apple@like-apple
-```
-
-Usage:
-
-```
-/like-apple:like-apple build it using this
-```
-
-Plugin skills are prefixed with the plugin name. Updating takes one line:
-
-```bash
-claude plugin update like-apple@like-apple
-```
+This method doesn't update automatically. To get a new version, run `git pull` in the `like-apple` folder and repeat the `cp` command.
 
 ## 3. What's inside
 

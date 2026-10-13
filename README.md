@@ -75,9 +75,32 @@ configuration.isPressed ? .easeOut(duration: 0.07) : .spring(response: 0.22, dam
 
 ## 2. 설치 (Claude Code)
 
-두 가지 방법 중 하나를 고르세요.
+### 2.1 플러그인 설치 (추천) — 자동 업데이트
 
-### 2.1 간단 설치 — `/like-apple`
+```bash
+claude plugin marketplace add HoYeonPark1221/like-apple
+claude plugin install like-apple@like-apple
+```
+
+**자동 업데이트 켜기** — 한 번만 하면 새 버전이 나올 때마다 알아서 받습니다.
+
+1. Claude Code에서 `/plugin` 입력
+2. **Marketplaces** → **like-apple** 선택
+3. **Enable auto-update** 선택
+
+사용법:
+
+```
+/like-apple:like-apple 참고해서 만들어줘
+```
+
+플러그인으로 설치한 스킬은 이름 앞에 플러그인 이름이 붙습니다. 자동 업데이트를 켜지 않았다면 이 명령으로 직접 받으면 됩니다.
+
+```bash
+claude plugin update like-apple@like-apple
+```
+
+### 2.2 간단 설치 — `/like-apple`
 
 ```bash
 git clone https://github.com/HoYeonPark1221/like-apple.git
@@ -90,26 +113,7 @@ cp -R like-apple/skills/like-apple ~/.claude/skills/
 /like-apple 참고해서 만들어줘
 ```
 
-업데이트는 `like-apple` 폴더에서 `git pull` 한 뒤 위의 `cp` 명령을 다시 실행합니다.
-
-### 2.2 플러그인 설치 — 업데이트가 편함
-
-```bash
-claude plugin marketplace add HoYeonPark1221/like-apple
-claude plugin install like-apple@like-apple
-```
-
-사용법:
-
-```
-/like-apple:like-apple 참고해서 만들어줘
-```
-
-플러그인으로 설치한 스킬은 이름 앞에 플러그인 이름이 붙습니다. 업데이트는 한 줄이면 됩니다.
-
-```bash
-claude plugin update like-apple@like-apple
-```
+이 방법은 자동 업데이트가 되지 않습니다. 새 버전은 `like-apple` 폴더에서 `git pull` 한 뒤 위의 `cp` 명령을 다시 실행해서 받습니다.
 
 ## 3. 들어 있는 것
 
