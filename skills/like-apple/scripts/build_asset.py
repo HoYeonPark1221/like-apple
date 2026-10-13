@@ -31,7 +31,7 @@ HEADER = """//
 //    .contentDrop      들어올 때와 나갈 때가 다른 전환
 //    EmergeFromSource  끊어도 이어지는 등장 (genie)
 //    SegmentMeter · CountdownRing · DecayingShake · TransitionsExample
-//    Physics · VelocityTracker · SnapDragExample   손의 속도를 이어받는 드래그
+//    Physics · VelocityTracker · PresentedOffset · SnapDragExample   손의 속도를 이어받는 드래그
 //    PagedDeck · Haptics · GlassMorphMenu · SymbolEffectsTour · Pop · IslandMorph
 //    CometStroke · RotatingGlowBorder · LivingMesh · ZoomTransitionExample
 //    AppleMetrics · .appleHitTarget() · ConcentricCardExample   컨트롤·베젤 규격, 최소 터치 영역, 동심 모서리

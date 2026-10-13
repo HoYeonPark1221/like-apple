@@ -13,7 +13,7 @@
 //    .contentDrop      들어올 때와 나갈 때가 다른 전환
 //    EmergeFromSource  끊어도 이어지는 등장 (genie)
 //    SegmentMeter · CountdownRing · DecayingShake · TransitionsExample
-//    Physics · VelocityTracker · SnapDragExample   손의 속도를 이어받는 드래그
+//    Physics · VelocityTracker · PresentedOffset · SnapDragExample   손의 속도를 이어받는 드래그
 //    PagedDeck · Haptics · GlassMorphMenu · SymbolEffectsTour · Pop · IslandMorph
 //    CometStroke · RotatingGlowBorder · LivingMesh · ZoomTransitionExample
 //    AppleMetrics · .appleHitTarget() · ConcentricCardExample   컨트롤·베젤 규격, 최소 터치 영역, 동심 모서리
@@ -341,18 +341,41 @@ final class VelocityTracker {
     }
 }
 
+/// 화면에 실제로 그려지는 값. `@State`에는 목표값만 있으므로, 스프링이 도는 동안의 위치는 여기서 읽는다.
+/// 상태가 아니라 참조라서 매 프레임 써도 뷰를 다시 그리게 하지 않는다.
+final class PresentedValue {
+    var value: Double = 0
+}
+
+/// 가로 위치를 그리면서, 애니메이션 중 매 프레임의 값을 `PresentedValue`에 적어 둔다.
+struct PresentedOffset: ViewModifier, Animatable {
+    var x: Double
+    let presented: PresentedValue
+
+    nonisolated var animatableData: Double {
+        get { x }
+        set { x = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        presented.value = x
+        return content.offset(x: x)
+    }
+}
+
 /// 가로로 끌어 몇 개의 자리 중 하나에 내려앉는 카드.
 struct SnapDragExample: View {
     let snapPoints: [Double] = [0, 120, 240]
     @State private var x: Double = 0
     @State private var origin: Double?
     @State private var tracker = VelocityTracker()
+    @State private var presented = PresentedValue()
 
     var body: some View {
         RoundedRectangle(cornerRadius: 20, style: .continuous)
             .fill(.tint)
             .frame(width: 80, height: 80)
-            .offset(x: x)
+            .modifier(PresentedOffset(x: x, presented: presented))
             .gesture(drag)
     }
 
@@ -360,12 +383,13 @@ struct SnapDragExample: View {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
                 if origin == nil {
-                    origin = x                       // 잡는 순간 보이던 값
+                    // 잡는 순간 화면에 보이던 값. 목표값(x)에서 출발하면 스프링이 한창일 때 순간이동한다.
+                    origin = presented.value
                     tracker.reset()
                 }
                 tracker.record(x: Double(value.translation.width))
                 let raw = (origin ?? x) + Double(value.translation.width)
-                // 애니메이션 없이 1:1. 스프링이 한창일 때 잡아도 그 자리에서 멈춘다.
+                // 애니메이션 없이 1:1. 도는 중이던 스프링은 여기서 멈추고, 보이던 자리에서 이어서 끈다.
                 withTransaction(Transaction(animation: nil)) { x = resisted(raw) }
             }
             .onEnded { _ in
