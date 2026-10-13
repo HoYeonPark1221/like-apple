@@ -1,6 +1,6 @@
 ---
 name: like-apple
-description: Make native APPS feel like Apple made them — Apple-style animation, sizing and platform behavior in SwiftUI for iOS, iPadOS and macOS, grounded in Apple's Human Interface Guidelines and distilled from building the Live Peninsula macOS notch app. Includes a catalog of Apple motion behaviors (Dynamic Island, pill HUD, genie, Liquid Glass morph, Siri glow, zoom transition, SF Symbol effects, number roll, sheet snapping, button press, countdown ring, reject shake) plus app-structure behavior (sheets, tab/navigation transitions, list insert/delete, loading, popover resize, iPad pointer effects); per-platform HIG rules (touch vs pointer vs keyboard, haptic patterns, size classes, Liquid Glass vs standard materials, component rules); Apple's spring system measured against the SDK; HIG-verified type sizes, control/bezel sizes and concentric corners; 29 code recipes compile-checked on iOS 17/26 and macOS 14/26 (written into the user's code only as needed, never dropped in as a whole file); and tools to MEASURE a reference recording. Use whenever the user builds or reviews a Swift/SwiftUI app UI and wants it to look, move or feel "like Apple" — "애플처럼/애플스럽게", "Dynamic Island처럼", "시스템 HUD처럼", "알람/타이머", "Liquid Glass", "스프링", "쫀득하게", "튕김", "전환", "햅틱", "동작 줄이기", "글자 크기", "베젤", "둥근 모서리", "여백", "아이패드 포인터", "맥에서 어색해", "HIG" — or says it feels cheap/janky/"구리다", even without naming Apple. Covers apps only: for websites/CSS/Framer Motion use apple-design; watchOS/visionOS/tvOS are out of scope.
+description: Make native APPS feel like Apple made them — Apple-style animation, sizing and platform behavior in SwiftUI for iOS, iPadOS and macOS, grounded in Apple's Human Interface Guidelines and distilled from building the Live Peninsula macOS notch app. Includes a catalog of Apple motion behaviors (Dynamic Island, pill HUD, genie, Liquid Glass morph, Siri glow, zoom transition, SF Symbol effects, number roll, sheet snapping, button press, countdown ring, reject shake) plus app-structure behavior (sheets, tab/navigation transitions, list insert/delete, loading, popover resize, iPad pointer effects); per-platform HIG rules (touch vs pointer vs keyboard, haptic patterns, size classes, Liquid Glass vs standard materials, component rules); Apple's spring system measured against the SDK; HIG-verified type sizes, control/bezel sizes and concentric corners; 29 code recipes compile-checked on iOS 17/26 and macOS 14/26 (written into the user's code only as needed, never dropped in as a whole file); and tools to MEASURE a reference recording. Use whenever the user builds or reviews a Swift/SwiftUI app UI and wants it to look, move or feel "like Apple" — "애플처럼/애플스럽게", "Dynamic Island처럼", "시스템 HUD처럼", "알람/타이머", "Liquid Glass", "스프링", "쫀득하게", "튕김", "전환", "햅틱", "동작 줄이기", "글자 크기", "베젤", "둥근 모서리", "여백", "아이패드 포인터", "맥에서 어색해", "HIG" — or says it feels cheap/janky/"구리다", even without naming Apple. Covers native apps on iOS, iPadOS and macOS for now; watchOS, visionOS and tvOS are not covered yet.
 ---
 
 # Like Apple — Apple의 애니메이션을 쉽게 만들기 (iOS · iPadOS · macOS)
@@ -13,7 +13,7 @@ description: Make native APPS feel like Apple made them — Apple-style animatio
 3. 움직임이 정보를 실어 나른다 (장식이 아니다).
 4. 과장하지 않는다 — 튕김은 운동량이 있을 때만.
 
-**범위: 앱.** iOS · iPadOS · macOS의 네이티브 앱(SwiftUI 중심, UIKit/AppKit 보조)만 다룬다. 웹사이트는 `apple-design`, watchOS · visionOS · tvOS는 다루지 않는다.
+**범위: 앱.** iOS · iPadOS · macOS의 네이티브 앱(SwiftUI 중심, UIKit/AppKit 보조)만 다룬다. watchOS · visionOS · tvOS는 아직 다루지 않는다(앞으로 넓힐 예정).
 움직임만이 아니라 **크기(베젤·둥근 모서리·글자)와 플랫폼 관례(입력 수단, 햅틱, 재질, 시스템 컴포넌트)**까지 Apple HIG를 근거로 맞춘다 —
 움직임이 Apple다워도 iPad에서 포인터에 반응이 없거나 Mac에서 호버가 없으면 애플스럽지 않다.
 
@@ -39,8 +39,6 @@ description: Make native APPS feel like Apple made them — Apple-style animatio
 **[HIG]** Apple Human Interface Guidelines 본문 · **[앱]** Live Peninsula에서 시각 검증으로 수렴한 근사. Dynamic Island·genie·Siri 글로우처럼 Apple이 곡선을 공개하지 않은 동작은
 "비슷하게 재현한 것"이라고 말하고, Apple의 값을 아는 척하지 않는다.
 
-> `apple-design` 스킬은 WWDC 원칙을 **웹사이트**(CSS/Framer Motion) 기준으로 정리한 범용 스킬이다. 이 스킬은 **앱** — 네이티브 Swift 코드,
-> Apple 동작의 구체적 재현, 플랫폼별 HIG 규칙 — 에 초점을 둔다. 원칙을 더 깊이 따지고 싶을 때만 `apple-design`을 같이 본다.
 
 ---
 
