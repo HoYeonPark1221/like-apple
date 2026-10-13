@@ -251,7 +251,7 @@ measured in [springs.md](references/springs.md). (`.snappy(duration: 0.42)` is b
 | Several state changes from an event handler | `withAnimation(curve) { ... }` | |
 | Values changed outside `withAnimation`, e.g. timer callbacks | `.animation(curve, value:)` on the observing side | Attach it where the value is observed, not where it's set, or the transition won't run |
 | Instant follow during drag | `withTransaction(Transaction(animation: nil))` | 1:1 |
-| A different curve in one spot | `.transaction(value:) { $0.animation = ... }` | e.g. linear only while locked, untouched otherwise |
+| A different curve in one spot | `.transaction(value:) { t in t.animation = ... }` | e.g. linear only while locked, untouched otherwise |
 | Numbers | `.contentTransition(.numericText(countsDown:))` + `.monospacedDigit()` | No sideways jitter when digit count changes |
 | Flip an icon's state | `.contentTransition(.symbolEffect(.replace))` | iOS 18 / macOS 15: `.replace.magic(fallback:)` — guard with `#available` |
 | One-off emphasis | `.symbolEffect(.bounce.down, value: count)` | Fix the value under Reduce Motion |
