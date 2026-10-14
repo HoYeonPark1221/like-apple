@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""references/recipes.md 의 ```swift 블록을 이어 붙여 assets/AppleMotion.swift 를 만든다.
+"""Concatenates the ```swift blocks of references/recipes.md into assets/AppleMotion.swift.
 
-레시피의 단일 출처는 recipes.md 다. 코드를 고칠 때는 recipes.md 를 고친 뒤 이 스크립트를 다시 돌린다.
-이 파일은 레시피 전체가 함께 컴파일되는지 검사하기 위한 것이다. 사용자 프로젝트에 통째로 복사하지 않는다.
+recipes.md is the single source of the recipes. After editing it, run this script again.
+The generated file exists to check that all recipes compile together; it is not copied into user projects.
 
-    python3 scripts/build_asset.py            # 파일 생성
-    python3 scripts/build_asset.py --check    # 생성 + macOS/iOS 타입체크(Swift 5·6)
+    python3 scripts/build_asset.py            # generate the file
+    python3 scripts/build_asset.py --check    # generate + typecheck for macOS/iOS (Swift 5 and 6)
 """
 import os
 import re
@@ -19,25 +19,24 @@ OUT = os.path.join(ROOT, "assets", "AppleMotion.swift")
 HEADER = """//
 //  AppleMotion.swift
 //
-//  Apple식 애니메이션 도구 모음 (iOS 17 / iPadOS 17 / macOS 14 이상).
-//  macOS 노치 앱 Live Peninsula를 개발하며 다듬은 모션·크기 규칙을 일반화한 것이다.
-//  이 파일은 like-apple 스킬의 references/recipes.md 에서 자동 생성된다 — 고칠 때는 레시피를 고치고 다시 만든다.
+//  Apple-style motion toolkit (iOS 17 / iPadOS 17 / macOS 14 and later).
+//  Generated from the like-apple skill's references/recipes.md — edit the recipes, then regenerate.
 //
-//  검사용 묶음이다 — 사용자 프로젝트에는 필요한 레시피만 옮겨 쓴다. 들어 있는 것:
-//    Motion            모션 어휘 (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
-//    .motion(_:value:) 동작 줄이기를 자동으로 따르는 .animation
-//    PressableStyle    누르는 순간 반응하는 버튼
-//    Materialize       재질이 도착하는 등장
-//    .contentDrop      들어올 때와 나갈 때가 다른 전환
-//    EmergeFromSource  끊어도 이어지는 등장 (genie)
+//  A verification bundle: bring only the recipes you need into a project. Contents:
+//    Motion            motion vocabulary (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
+//    .motion(_:value:) .animation that follows Reduce Motion automatically
+//    PressableStyle    a button that reacts the instant it's pressed
+//    Materialize       a material that arrives
+//    .contentDrop      different entrance and exit
+//    EmergeFromSource  an interruptible entrance (genie)
 //    SegmentMeter · CountdownRing · DecayingShake · TransitionsExample
-//    Physics · VelocityTracker · PresentedOffset · SnapDragExample   손의 속도를 이어받는 드래그
+//    Physics · VelocityTracker · PresentedOffset · SnapDragExample   a drag that carries the hand's velocity
 //    PagedDeck · Haptics · GlassMorphMenu · SymbolEffectsTour · Pop · IslandMorph
 //    CometStroke · RotatingGlowBorder · LivingMesh · ZoomTransitionExample
-//    AppleMetrics · .appleHitTarget() · ConcentricCardExample   컨트롤·베젤 규격, 최소 터치 영역, 동심 모서리
-//    .applePointerEffect · Haptics.play(meaning:) · SystemSheetExample · AdaptiveRow · GlassLayeringExample · .rejectShake   플랫폼 HIG
+//    AppleMetrics · .appleHitTarget() · ConcentricCardExample   control/bezel specs, minimum hit area, concentric corners
+//    .applePointerEffect · Haptics.play(meaning:) · SystemSheetExample · AdaptiveRow · GlassLayeringExample · .rejectShake   platform behavior
 //
-//  이름이 이미 쓰이고 있으면(예: Motion, Haptics) 프로젝트에 맞게 접두어를 붙여 바꾼다.
+//  If a name is already taken in your project (e.g. Motion, Haptics), rename it with a prefix.
 //
 
 """
@@ -47,15 +46,15 @@ def extract():
     text = open(SRC, encoding="utf-8").read()
     blocks = re.findall(r"```swift\n(.*?)```", text, flags=re.S)
     if not blocks:
-        sys.exit("swift 블록을 찾지 못했다: " + SRC)
+        sys.exit("no swift blocks found: " + SRC)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(HEADER + "\n\n".join(b.rstrip("\n") for b in blocks) + "\n")
-    print(f"{len(blocks)}개 블록 → {os.path.relpath(OUT, ROOT)} ({sum(1 for _ in open(OUT, encoding='utf-8'))}줄)")
+    print(f"{len(blocks)} blocks → {os.path.relpath(OUT, ROOT)} ({sum(1 for _ in open(OUT, encoding='utf-8'))} lines)")
 
 
 def typecheck():
-    env = {  # 하네스의 전체 환경 변수가 있으면 SwiftUIMacros 플러그인 서버가 실패할 수 있어 최소 환경만 넘긴다.
+    env = {  # A full harness environment can make the SwiftUIMacros plugin server fail; pass a minimal one.
         "PATH": os.environ.get("PATH", ""),
         "HOME": os.environ.get("HOME", ""),
         "DEVELOPER_DIR": os.environ.get("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer"),

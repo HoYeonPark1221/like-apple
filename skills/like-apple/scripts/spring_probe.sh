@@ -1,11 +1,11 @@
 #!/bin/bash
-# 스프링 값이 실제로 어떤 곡선을 만드는지 SDK에서 직접 계산한다 (추측 대신 측정).
+# Computes the actual curve a spring value produces, directly on the SDK (measure instead of guessing).
 #
-#   scripts/spring_probe.sh 0.42 0.85        # response(=duration) 0.42초, 감쇠비 0.85
-#   scripts/spring_probe.sh 0.42 0.85 0.5    # 시작 속도(남은 거리 대비)를 줄 수도 있다
+#   scripts/spring_probe.sh 0.42 0.85        # response (= duration) 0.42s, damping ratio 0.85
+#   scripts/spring_probe.sh 0.42 0.85 0.5    # optionally an initial velocity (relative to remaining distance)
 #
-# 출력: 오버슈트 %, 최고점 시각, 목표의 ±1% 안에 머무르기 시작하는 시각, Apple 파라미터(bounce) 표기.
-# 감쇠비 = 1 − bounce, response = duration 이다 (SDK에서 확인).
+# Output: overshoot %, time of peak, time it stays within ±1% of the target, and the Apple (bounce) form.
+# damping ratio = 1 − bounce, response = duration (confirmed on the SDK).
 
 set -euo pipefail
 R="${1:?usage: spring_probe.sh <response> <dampingRatio> [relativeVelocity]}"

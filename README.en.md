@@ -67,7 +67,7 @@ A press is shown with **brightness**, not opacity. Fade a filled button and it d
 ---
 
 Notes like "it used to be this; here's why it changed" piled up all over the Live Peninsula codebase.
-**like-apple takes that record, re-checks it against Apple's Human Interface Guidelines and measurements in Xcode, and generalizes it for any iOS, iPadOS or macOS app.**
+**like-apple builds on that know-how and Apple's Human Interface Guidelines to help you implement Apple's animations in SwiftUI.**
 Now Claude picks values by the same standard when it builds your animations.
 
 ## 2. Install (Claude Code)
@@ -116,7 +116,7 @@ This method doesn't update automatically. To get a new version, run `git pull` i
 
 ### 3.1 15 principles — the rules Claude follows when it animates
 
-These are what Claude checks every time it builds or fixes an animation. Most of them were learned the hard way in Live Peninsula. A few, in plain words:
+These are what Claude checks every time it builds or fixes an animation. A few, in plain words:
 
 - **Don't bounce by default.** Bounce is for moments with real momentum, like when the user flings something.
 - **Press instantly, release gently.** Entrances and exits keep different time, too.
@@ -140,7 +140,7 @@ Some of what's in it:
 - A **side-to-side shake** that says "no", like entering a wrong password
 
 Each entry is marked with **how far you can trust it**: whether Apple provides it officially, whether it's written in Apple's design guidelines,
-or whether it's an approximation tuned by eye in Live Peninsula. For motions where Apple hasn't published the values, Claude says it's building an approximation.
+or whether it's a close reproduction because Apple hasn't published the values. For motions where Apple hasn't published the values, Claude says it's building an approximation.
 
 ### 3.3 29 code recipes — SwiftUI code, ready to use
 

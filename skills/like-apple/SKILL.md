@@ -1,6 +1,6 @@
 ---
 name: like-apple
-description: Make SwiftUI apps on iOS, iPadOS and macOS move and feel like Apple made them — springs, press and hover feedback, drag-and-release, enter/exit timing, Liquid Glass, haptics, Reduce Motion, bezel and corner sizing — grounded in Apple's HIG and SDK measurements and distilled from building the Live Peninsula notch app. Includes a catalog of Apple motions, 29 compile-checked recipes and tools to measure a reference recording. Use when building or reviewing Swift/SwiftUI UI that should feel Apple-like, or when motion feels cheap or janky — "애플처럼", "애플스럽게", "Dynamic Island처럼", "스프링", "쫀득하게", "튕김", "구리다". Native apps only; not watchOS, visionOS or tvOS yet.
+description: Make SwiftUI apps on iOS, iPadOS and macOS move and feel like Apple made them — springs, press and hover feedback, drag-and-release, enter/exit timing, Liquid Glass, haptics, Reduce Motion, bezel and corner sizing — grounded in Apple's HIG, SDK measurements and hands-on motion research. Includes a catalog of Apple motions, 29 compile-checked recipes and tools to measure a reference recording. Use when building or reviewing Swift/SwiftUI UI that should feel Apple-like, or when motion feels cheap or janky — "애플처럼", "애플스럽게", "Dynamic Island처럼", "스프링", "쫀득하게", "튕김", "구리다". Native apps only; not watchOS, visionOS or tvOS yet.
 ---
 
 # Like Apple — Apple-style motion for iOS · iPadOS · macOS apps
@@ -17,10 +17,7 @@ Apple-like motion is not flashy; it is **quietly precise**, and it reduces to fo
 Beyond motion, match **sizing (bezels, rounded corners, type) and platform conventions (input method, haptics, materials, system components)** to Apple's HIG —
 motion can be perfect and the app still won't feel like Apple if the iPad pointer gets no response or the Mac has no hover.
 
-**Origin: Live Peninsula.** Distilled from building **Live Peninsula**, a macOS notch app, where every motion value was tuned and re-tuned with the reason recorded in code.
-P1–P13 and every [App]-graded value come from there (sources per rule: [evidence.md](references/evidence.md)); HIG and SDK measurements generalize them to any iOS · iPadOS · macOS app.
-
-> The reference files are written in Korean; read them as-is. In them the [App] grade is written **[앱]**.
+**Basis.** Know-how from researching Apple-like motion while building the Live Peninsula app, cross-checked against Apple's HIG and measured on the SDK.
 
 ## 0. Where things are
 
@@ -30,13 +27,12 @@ P1–P13 and every [App]-graded value come from there (sources per rule: [eviden
 | **Code recipes** | 29 ready-to-use recipes. Use as a starting point; write only what's needed | [references/recipes.md](references/recipes.md) (verification bundle: `assets/AppleMotion.swift` — compile-checked on macOS 14/26 · iOS 17/26 × Swift 5/6; never copied into the user's project) |
 | **Springs** | Apple presets, damping ratio ↔ bounce, overshoot and settle time | [references/springs.md](references/springs.md), `scripts/spring_probe.sh` |
 | **Platforms & app structure (HIG)** | iOS · iPadOS · macOS differences in input, haptics, layout and materials; HIG rules for sheets, tab bars, toolbars, popovers, alerts, lists, progress | [references/platforms.md](references/platforms.md) |
-| **Sizes, type, bezels** | Apple type sizes (22 values SDK-verified for iOS/macOS), control/bezel sizes, concentric corners, Live Peninsula's current size audit | [references/metrics.md](references/metrics.md) |
+| **Sizes, type, bezels** | Apple type sizes (22 values SDK-verified for iOS/macOS), control/bezel sizes, concentric corners | [references/metrics.md](references/metrics.md) |
 | **Reference measurement** | Record an Apple device → view frames → numbers → spring fit (with ranges). Accuracy verified | [references/measurement.md](references/measurement.md), `scripts/filmstrip.sh` `track_video.sh` `fit_spring.py` |
 | **Tools & fixes** | Which SwiftUI API for which motion, the full per-platform table, and 30 symptom → cause → fix entries | [references/tools-and-fixes.md](references/tools-and-fixes.md) |
-| **Evidence** | Which Live Peninsula file or bug each rule came from | [references/evidence.md](references/evidence.md) |
 
-**Evidence grades** — never mix them. **[Apple]** guaranteed by official APIs, sessions or HIG · **[SDK]** measured on this Mac's SDK ·
-**[HIG]** Apple Human Interface Guidelines text · **[App]** an approximation that converged by eye in Live Peninsula. For behaviors whose curves Apple hasn't published — Dynamic Island, genie, Siri glow —
+**Evidence grades** — never mix them. **[Apple]** guaranteed by an official API or WWDC session · **[HIG]** written in the Human Interface Guidelines ·
+**[SDK]** measured on a real SDK · **[Approx.]** a close reproduction of something Apple hasn't published. For behaviors whose curves Apple hasn't published — Dynamic Island, genie, Siri glow —
 say "this is a close reproduction" and never pretend to know Apple's values.
 
 ---
@@ -58,8 +54,8 @@ say "this is a close reproduction" and never pretend to know Apple's values.
 4. **Write the code.** Find the matching recipe in [recipes.md](references/recipes.md) and use it as a starting point, writing **only what's needed, fitted to the project's code style, names and structure**.
    Never copy `assets/AppleMotion.swift` wholesale — that file exists to check that the recipes compile. Insert it whole only if the user asks.
    If the project already has something similar (a `Motion`-like vocabulary, a button style), use or extend it instead of adding another.
-   When changing recipe code, edit `recipes.md` and regenerate with `python3 scripts/build_asset.py --check` (so docs and file never drift).
-5. **Be honest.** State that [App]-grade behaviors are approximations. When asked for "Apple's values", separate [SDK]-measured values from [App] approximations.
+   (Only when maintaining this skill itself: edit `recipes.md`, then regenerate with `python3 scripts/build_asset.py --check`. Never edit an installed copy.)
+5. **Be honest.** State that [Approx.] behaviors are approximations. When asked for "Apple's values", separate [SDK]-measured values from [Approx.] ones.
 6. **Check with your eyes.** Compiling doesn't guarantee the look. Record in the simulator and unroll frames with `filmstrip.sh`;
    if there's a reference, measure both with the same tools — this skill's own `Materialize` only revealed a 0.3s smear on exit after being recorded.
 7. **Finish.** Reduced-motion replacement, rapid tapping and mid-motion grabs, slow-motion check, the §8 checklist. Breaking under rapid taps is the most common defect.
@@ -80,7 +76,7 @@ From [HIG Motion](https://developer.apple.com/design/human-interface-guidelines/
 
 ---
 
-## 3. Principles — rules hardened in Live Peninsula
+## 3. Principles
 
 ### P1. Critical damping (1.0) is the default. Elasticity only with momentum
 
@@ -186,7 +182,7 @@ Keep the information; change only the *movement*. Design a replacement for every
 
 Response 0.3–0.6 and damping 0.6–1.0 scattered across the same intent (state change) is what "an inconsistent app" is. Gather them in a
 `Motion`-like enum under *names by kind*, with one line per constant explaining **why that value**. Even feature-local values get a `static let`
-name (`phaseSpring`, `LevelIconMotion.spring`). New animations pick a name, not a number.
+name (e.g. `static let phaseSpring`). New animations pick a name, not a number.
 
 ### P14. Materials separate layers — glass only on the functional layer
 
@@ -261,7 +257,7 @@ Split shared code with `#if os(macOS)` / `#elseif canImport(UIKit)` (see `Haptic
 
 ## 7. Symptom → cause → fix
 
-When the user describes a symptom ("it jumps", "feels cheap", "text gets clipped", "flings away", "freezes on rapid taps", "no response on iPad hover"…), look it up in [tools-and-fixes.md §3](references/tools-and-fixes.md) — 30 symptoms with cause and fix, most traced to a real Live Peninsula bug.
+When the user describes a symptom ("it jumps", "feels cheap", "text gets clipped", "flings away", "freezes on rapid taps", "no response on iPad hover"…), look it up in [tools-and-fixes.md §3](references/tools-and-fixes.md) — 30 symptoms with cause and fix.
 
 ---
 
@@ -273,7 +269,7 @@ When the user describes a symptom ("it jumps", "feels cheap", "text gets clipped
 - [ ] Survives rapid taps and mid-motion grabs; values flow instead of jumping (P4, P5).
 - [ ] Drags are 1:1, carry release velocity and rubber-band at the edges (P7).
 - [ ] Nothing the system does was rebuilt (detents, paging, numericText, symbolEffect, glassEffectID, zoom); system components follow [platforms.md §6](references/platforms.md) (P8).
-- [ ] [Apple]/[SDK] facts and [App] approximations kept apart.
+- [ ] [Apple]/[HIG]/[SDK] facts and [Approx.] reproductions kept apart.
 - [ ] Reduce Motion keeps the information (transforms removed, fades instead); Reduce Transparency and contrast checked (P11).
 - [ ] Haptics only at detents, by HIG meaning, same frame as the visual; `NSHapticFeedbackManager` on macOS; optional.
 - [ ] Semantic text styles, hit areas at spec (iOS 44 / macOS 28pt), concentric nested corners ([metrics.md](references/metrics.md)).

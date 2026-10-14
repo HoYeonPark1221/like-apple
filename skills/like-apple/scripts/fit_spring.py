@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""track_video 가 뽑은 CSV 한 열에 스프링을 맞춰 response·감쇠비(=Apple duration·bounce)를 구한다.
+"""Fits a spring to one column of the CSV from track_video to get response and damping ratio (= Apple duration and bounce).
 
     python3 scripts/fit_spring.py data.csv --col mean --from 2.9 --to 3.6
-    python3 scripts/fit_spring.py --selftest       # 정답을 아는 합성 데이터로 도구 자체를 검증
+    python3 scripts/fit_spring.py --selftest       # verify the tool itself on synthetic data with known answers
 
---from/--to  분석 구간(초). 한 번의 전환(나타남 또는 사라짐)만 포함하게 자른다.
---col        mean(투명도×면적) | count(면적) | bx by bw bh(바운딩 박스: 이동·크기)
-방향(0→1 / 1→0)은 구간의 처음과 끝 값으로 자동 판별해 0→1로 정규화한다.
+--from/--to  analysis window (s). Cut it to contain a single transition (appear or disappear).
+--col        mean (opacity × area) | count (area) | bx by bw bh (bounding box: movement, size)
+Direction (0→1 / 1→0) is detected from the first and last values and normalized to 0→1.
 
-주의: 이 도구는 "곡선이 스프링 모양인가"를 가정하고 맞춘다. 맞춘 값(rmse)이 크면 스프링이 아니라
-ease일 수 있다 — 그 경우 10%→90% 시간과 곡선 모양을 그대로 쓴다.
+Careful: this tool assumes the curve is spring-shaped. If the fit error (rmse) is large it may be
+an ease, not a spring — then use the 10%→90% time and the curve shape directly.
 """
 import argparse
 import csv
@@ -19,7 +19,7 @@ import sys
 
 
 def step(t, r, z):
-    """스프링의 단위 계단 응답. r = response(초), z = 감쇠비. SwiftUI Spring(response:dampingRatio:)과 같은 식."""
+    """Unit step response of a spring. r = response (s), z = damping ratio. Same formula as SwiftUI Spring(response:dampingRatio:)."""
     if t <= 0:
         return 0.0
     w = 2 * math.pi / r
@@ -39,14 +39,14 @@ def sse(ts, ys, t_on, r, z):
 def fit(ts, ys):
     first = ts[0]
     best = (1e18, 0, 0, 0)
-    # 거친 격자
+    # coarse grid
     for t_on in [first - 0.05 + 0.01 * i for i in range(0, 70)]:
         for r in [0.06 + 0.04 * i for i in range(0, 32)]:
             for z in [0.3 + 0.1 * i for i in range(0, 12)]:
                 e = sse(ts, ys, t_on, r, z)
                 if e < best[0]:
                     best = (e, t_on, r, z)
-    # 촘촘히
+    # fine grid
     _, t0, r0, z0 = best
     for t_on in [t0 - 0.01 + 0.002 * i for i in range(0, 11)]:
         for r in [max(0.03, r0 - 0.04) + 0.005 * i for i in range(0, 17)]:
@@ -58,26 +58,26 @@ def fit(ts, ys):
     return t_on, r, z, math.sqrt(e / len(ts))
 
 
-# 범위의 폭을 정하는 보정 계수. 이론값(χ² 3자유도 95%)은 7.8이지만, 정규화에 쓴 시작·끝 값의 추정 오차 등이 빠져
-# 실제로는 정답이 범위 밖으로 나갔다. 합성 데이터(노이즈 σ=0.02, 60fps, 36케이스, 시드 777)로 보정해 k=30에서
-# 정답 포함 비율 97%(35/36)를 얻었다. 노이즈 모양이 가우시안이 아닌 실제 영상에서는 이보다 안 맞을 수 있다.
+# Calibration factor for the range width. The theoretical value (χ², 3 dof, 95%) is 7.8, but it ignores errors such as the estimated start/end values used for
+# normalization, so the truth fell outside the range in practice. Calibrated on synthetic data (noise σ=0.02, 60fps, 36 cases, seed 777): k=30
+# contains the truth 97% of the time (35/36). Real video with non-Gaussian noise may do worse.
 RANGE_K = 30.0
-# 깨끗한 데이터(rmse≈0.003)에서는 잔차로 추정한 노이즈가 0에 가까워 범위가 지나치게 좁아진다. 실제 영상에는 가장자리
-# 안티앨리어싱·임계값·프레임 양자화 같은 체계 오차가 남기 때문에 정규화된 값 기준 σ의 하한을 둔다.
+# On clean data (rmse≈0.003) the noise estimated from residuals is near zero and the range gets too narrow. Real video keeps systematic errors
+# (edge anti-aliasing, thresholding, frame quantization), so σ has a floor on the normalized scale.
 SIGMA2_FLOOR = 2.5e-4
-# 보정: 정답을 아는 시뮬레이터 녹화 9창(알려진 스프링 5 + Dynamic Island 폭 4)에서 하한 σ≥0.01이면 정답이 모두 범위에 들어왔다
-# (하한이 없으면 6/9). 표본이 적으므로 한 단계 여유를 둔 σ≥0.016을 쓴다. 평균 범위 폭은 response 0.17s, dampingRatio 0.36.
+# Calibration: on 9 simulator-recording windows with known answers (5 known springs + 4 Dynamic Island widths), a floor of σ≥0.01 put every answer in range
+# (6/9 without a floor). The sample is small, so σ≥0.016 adds a margin. Average range width: response 0.17s, dampingRatio 0.36.
 
 
 def uncertainty(ts, ys, t_on0, r0, z0):
-    """최적값 주변에서 '데이터가 구분하지 못하는' 파라미터 범위(대략 95%).
-    노이즈 크기를 잔차에서 추정하고, 오차가 그만큼(χ² 3자유도 95%) 늘어나는 안쪽을 범위로 본다.
-    response와 감쇠비는 서로 보완하므로 한 값만 내놓으면 정밀해 보이는 착각을 준다."""
+    """The parameter range around the best fit that the data can't distinguish (roughly 95%).
+    Estimates the noise from residuals and takes the region where the error grows by no more than that (χ², 3 dof, 95%).
+    Response and damping trade off, so reporting a single value would create false precision."""
     n = len(ts)
     e0 = sse(ts, ys, t_on0, r0, z0)
-    sigma2 = max(e0 / max(n - 3, 1), SIGMA2_FLOOR)   # 노이즈 하한 — 아래 SIGMA2_FLOOR 설명 참고
+    sigma2 = max(e0 / max(n - 3, 1), SIGMA2_FLOOR)   # noise floor — see SIGMA2_FLOOR
     limit = e0 + RANGE_K * sigma2
-    r_ok, z_ok = [r0], [z0]                          # 최적점 자신은 항상 범위 안
+    r_ok, z_ok = [r0], [z0]                          # the best fit itself is always in range
     for r in [max(0.03, r0 - 0.2) + 0.01 * i for i in range(41)]:
         for z in [0.3 + 0.025 * i for i in range(45)]:
             m = min(sse(ts, ys, t_on0 - 0.04 + 0.008 * i, r, z) for i in range(11))
@@ -99,7 +99,7 @@ def normalize(ts, vs):
     v0 = sorted(vs[:k])[k // 2]
     v1 = sorted(vs[-k:])[k // 2]
     if abs(v1 - v0) < 1e-9:
-        sys.exit("구간의 처음과 끝 값이 같다 — 전환이 이 구간에 없다")
+        sys.exit("first and last values are equal — there is no transition in this window")
     return [(v - v0) / (v1 - v0) for v in vs], ("0→1" if v1 > v0 else "1→0")
 
 
@@ -112,7 +112,7 @@ def crossing(ts, ys, level):
 
 def report(ts, vs, label="", quiet=False):
     ys, direction = normalize(ts, vs)
-    # 변화가 시작되는 지점부터만 쓴다 (앞의 평평한 구간이 길면 격자 탐색이 흐려진다)
+    # use only from where the change starts (a long flat lead-in blurs the grid search)
     start = max(0, next((i for i, y in enumerate(ys) if y > 0.02), 0) - 2)
     ts2, ys2 = ts[start:], ys[start:]
     t_on, r, z, rmse = fit(ts2, ys2)
@@ -120,23 +120,23 @@ def report(ts, vs, label="", quiet=False):
     t10, t90 = crossing(ts2, ys2, 0.10), crossing(ts2, ys2, 0.90)
     peak = max(ys2)
     if not quiet:
-        print(f"{label}방향 {direction}, 샘플 {len(ts2)}개, rmse {rmse:.3f}")
-        print(f"  최적값      : response {r:.3f}s  dampingRatio {z:.3f}  (Apple: .spring(duration: {r:.3f}, bounce: {max(0.0, 1 - z):.3f}))")
-        print(f"  데이터가 허용하는 범위(보정된 ≈95%): response {r_lo:.2f}~{r_hi:.2f}s,  dampingRatio {z_lo:.2f}~{min(z_hi, 1.4):.2f}")
+        print(f"{label}direction {direction}, {len(ts2)} samples, rmse {rmse:.3f}")
+        print(f"  best fit    : response {r:.3f}s  dampingRatio {z:.3f}  (Apple: .spring(duration: {r:.3f}, bounce: {max(0.0, 1 - z):.3f}))")
+        print(f"  range the data allows (calibrated ≈95%): response {r_lo:.2f}~{r_hi:.2f}s,  dampingRatio {z_lo:.2f}~{min(z_hi, 1.4):.2f}")
         names = presets_in(z_lo, z_hi)
-        print(f"  범위에 걸리는 Apple 프리셋: {', '.join(names) if names else '없음(프리셋 사이)'}"
-              + ("  ← 이 데이터만으로는 구분할 수 없다" if len(names) > 1 else ""))
+        print(f"  Apple presets in range: {', '.join(names) if names else 'none (between presets)'}"
+              + ("  ← this data alone can't tell them apart" if len(names) > 1 else ""))
         if t10 is not None and t90 is not None:
-            print(f"  직접 잰 값  : 10%→90% {t90 - t10:.3f}s,  최고점 {100 * (peak - 1):+.1f}%  (1을 넘으면 오버슈트)")
-        print("  해석 주의   : rmse>0.08이면 스프링이 아니라 ease일 수 있다. 프레임이 적거나 노이즈가 크면 범위가 넓어진다 — "
-              "더 정확히 알려면 슬로모션(120fps↑)으로 다시 찍는다.")
+            print(f"  measured    : 10%→90% {t90 - t10:.3f}s,  peak {100 * (peak - 1):+.1f}%  (above 0 = overshoot)")
+        print("  careful     : rmse>0.08 may mean an ease, not a spring. Few frames or high noise widen the range — "
+              "for more precision, re-record in slow motion (120fps+).")
     return r, z, rmse, (r_lo, r_hi), (z_lo, z_hi)
 
 
 def selftest():
     ok = True
-    # (1) 노이즈 없으면 정확히 복원돼야 한다 — 알고리즘 자체의 검증
-    print("(1) 노이즈 0: 정답 → 복원")
+    # (1) with no noise it must recover exactly — verifies the algorithm itself
+    print("(1) zero noise: truth → recovered")
     for r, z in [(0.42, 0.85), (0.30, 1.0), (0.35, 0.72), (0.5, 0.5)]:
         ts = [1.0 + i / 60 for i in range(84)]
         ys = [step(t - 1.07, r, z) for t in ts]
@@ -146,8 +146,8 @@ def selftest():
         ok &= good
         print(f"    r={r:.2f} ζ={z:.2f} → r={rr:.3f} ζ={zz:.3f}  {'OK' if good else 'FAIL'}")
 
-    # (2) 노이즈가 있으면 값이 흔들린다 — 그래서 '범위'가 정직한지(정답을 포함하는지) 확인
-    print("(2) 노이즈 있음(σ=0.02, 60fps): 보고한 범위가 정답을 포함하는 비율")
+    # (2) with noise the values wobble — so check that the range is honest (contains the truth)
+    print("(2) with noise (σ=0.02, 60fps): how often the reported range contains the truth")
     rnd = random.Random(2024)
     n, hit_r, hit_z = 16, 0, 0
     for _ in range(n):
@@ -159,9 +159,9 @@ def selftest():
         _, _, _, (rl, rh), (zl, zh) = report(ts, vs, quiet=True)
         hit_r += rl - 0.005 <= r <= rh + 0.005
         hit_z += zl - 0.01 <= z <= zh + 0.01
-    print(f"    response 범위 포함 {hit_r}/{n}, dampingRatio 범위 포함 {hit_z}/{n}  (목표: ≥ 85%)")
+    print(f"    response in range {hit_r}/{n}, dampingRatio in range {hit_z}/{n}  (target: ≥ 85%)")
     ok &= hit_r >= 0.85 * n and hit_z >= 0.85 * n
-    print("자체 검증:", "통과" if ok else "실패")
+    print("self-test:", "PASS" if ok else "FAIL")
     sys.exit(0 if ok else 1)
 
 
@@ -176,7 +176,7 @@ def main():
     if a.selftest:
         selftest()
     if not a.csv:
-        ap.error("csv 경로가 필요하다")
+        ap.error("a csv path is required")
     rows = list(csv.DictReader(open(a.csv)))
     ts = [float(r["t"]) for r in rows]
     vs = [float(r[a.col]) for r in rows]
@@ -185,7 +185,7 @@ def main():
         pairs = [(t, v) for t, v in zip(ts, vs) if lo <= t <= hi]
         ts, vs = [p[0] for p in pairs], [p[1] for p in pairs]
     if len(ts) < 8:
-        sys.exit("샘플이 너무 적다 — 구간을 넓혀라")
+        sys.exit("too few samples — widen the window")
     report(ts, vs)
 
 

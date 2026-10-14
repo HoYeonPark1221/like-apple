@@ -1,5 +1,5 @@
 #!/bin/bash
-# corner_radius.swift 를 컴파일해 실행한다. 사용법은 corner_radius.swift 머리말 참고.
+# Compiles and runs corner_radius.swift. See its header for usage.
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 BIN="${TMPDIR:-/tmp}/like-apple-corner-radius"

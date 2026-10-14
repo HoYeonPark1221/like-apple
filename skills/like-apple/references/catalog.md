@@ -1,200 +1,198 @@
-# Apple 동작 카탈로그 — "이것처럼"을 구현으로 옮기기
+# Apple motion catalog — from "make it like that" to SwiftUI
 
-사용자가 "Dynamic Island처럼", "시스템 HUD처럼", "Siri 글로우처럼"이라고 하면 **그 동작이 무엇으로 이루어졌는지**를 먼저
-분해한다. Apple의 움직임은 대개 몇 가지 재료(스프링 하나, 비대칭 박자, 앵커, 값 흘리기)의 조합이다. 아래 항목은 재료와 구현을 함께 준다.
+When someone says "like the Dynamic Island", "like the system HUD" or "like the Siri glow", first break the motion down into **what it is made of**.
+Apple's motion is usually a combination of a few ingredients — one shared spring, asymmetric timing, an anchor, a value that flows. Each entry below gives the ingredients and the implementation.
 
-**근거 등급** — 이것을 섞어서 말하지 않는다. Apple이 공개한 것과 우리가 눈으로 맞춘 것은 다르다.
-- **[Apple]** Apple 공식 API·세션·가이드가 직접 보장하는 동작. 그대로 쓴다.
-- **[SDK]** 이 맥의 SDK에서 값을 측정해 확인한 것.
-- **[앱]** Live Peninsula에서 시각 검증으로 수렴한 근사. Apple의 비공개 구현을 흉내 낸 것이므로 "비슷하게 보이는" 수준이라고 말한다.
+**Evidence grades** — never blur them. What Apple publishes and what is reproduced by eye are different things.
+- **[Apple]** Behavior guaranteed by an official API, WWDC session or guideline. Use as is.
+- **[HIG]** Written in Apple's Human Interface Guidelines.
+- **[SDK]** Measured on a real SDK (see [springs.md](springs.md)).
+- **[Approx.]** A close reproduction of something Apple hasn't published. Say it "looks close", never that it *is* Apple's implementation.
 
-**크기·글자·베젤·모서리**는 이 문서가 아니라 [metrics.md](metrics.md)를 본다(Apple 글자 크기, 컨트롤 규격, 동심 모서리).
+Code lives under the same number in [recipes.md](recipes.md). Spring values are explained in [springs.md](springs.md). Sizes, type and corners are in [metrics.md](metrics.md).
 
-코드는 [recipes.md](recipes.md)의 같은 번호에 있다. 스프링 값의 의미는 [springs.md](springs.md).
-
-| 이렇게 말하면 | 항목 |
+| When they say | Entry |
 | --- | --- |
-| 버튼 눌림, 탭 반응 | 1 |
-| 토글, 켜졌다 꺼짐 | 2 |
-| 시트·카드를 끌어서 놓기, 칸에 맞춰 멈춤 | 3 |
-| 알약 HUD, 토스트(이 앱식) — Apple 시스템 HUD는 아래 "기능별" | 4 |
-| Dynamic Island, 알약이 커졌다 줄어듦 | 5 |
-| 맥 최소화(genie), 빨려 들어감 | 6 |
-| Liquid Glass 합쳐지고 갈라짐 | 7 |
-| 숫자가 굴러감, 아이콘이 바뀜 | 8 |
-| 아이콘이 톡/깜빡/흔들 | 9 |
-| 앱이 열리듯 커지는 전환 | 10 |
-| 홈 화면처럼 페이지 넘김 | 11 |
-| 타이머 링, 진행 표시 | 12 |
-| 알림 종이 울림 | 13 |
-| Siri / Apple Intelligence 글로우 | 14 |
-| 손글씨 "hello" | 15 |
-| 끝에서 고무줄처럼 버팀, 던지면 더 감 | 16 |
-| 손끝 햅틱 | 17 |
-| 시트가 올라오고 닫힘, 반만 열림 | 18 |
-| 안 된다는 표시(잠긴 것을 끌기, 틀린 암호) | 19 |
-| 포인터를 올렸을 때(iPad·Mac) | 20 |
-| 글자·창 크기가 바뀔 때 레이아웃 | 21 |
-| 목록에 행이 들어오고 나감, 순서 바꾸기 | 22 |
-| 탭 전환, 화면 push/pop | 23 |
-| 로딩, 진행 표시 | 24 |
-| 팝오버·패널 크기가 바뀜 | 25 |
+| Button press, tap feedback | 1 |
+| Toggle, something switching on and off | 2 |
+| Drag a card and let it snap into place | 3 |
+| A small pill-shaped status HUD or toast (custom) — for Apple's own system HUDs see "Per-feature" below | 4 |
+| Like the Dynamic Island — a pill that grows and shrinks | 5 |
+| Mac minimize (genie), being sucked in | 6 |
+| Liquid Glass shapes merging and splitting | 7 |
+| Rolling numbers, an icon swapping | 8 |
+| An icon that pops, pulses or wiggles | 9 |
+| A screen that zooms open from what you tapped | 10 |
+| Paging like the Home Screen | 11 |
+| Timer ring, progress | 12 |
+| A ringing notification bell | 13 |
+| Siri / Apple Intelligence glow | 14 |
+| The handwritten "hello" | 15 |
+| Rubber-band at the edge, fling to go further | 16 |
+| Haptics under the finger | 17 |
+| A sheet sliding up, half open, swiped away | 18 |
+| "No" — dragging something locked, a wrong password | 19 |
+| Pointer hover (iPad, Mac) | 20 |
+| Layout reflowing for large text or a narrow window | 21 |
+| List rows inserting, deleting, reordering | 22 |
+| Switching tabs, pushing and popping screens | 23 |
+| Loading and progress | 24 |
+| A popover or panel changing size | 25 |
 
-앱 구조(18–25)의 HIG 근거는 [platforms.md](platforms.md)에 플랫폼별로 정리되어 있다.
-
----
-
-### 1. 눌림 — 버튼·컨트롤
-**재료:** 누르는 순간 즉시(0.07s) 작아지고 밝기가 살짝 내려간다 → 놓으면 되튐 없는 스프링으로 돌아온다 → (포인터가 있으면) 호버에 밝기가 오른다.
-눌림은 `opacity`가 아니라 `brightness`로 — 채운 알약은 투명해지면 눌린 게 아니라 꺼진 것처럼 보인다.
-**구현:** `PressableStyle` (recipes §3). Liquid Glass 위라면 `.glassEffect(.regular.interactive())`가 확대·되튐·반짝임을 시스템이 맡는다 [Apple, WWDC25].
-**근거:** [앱] + [Apple]
-
-### 2. 토글·면이 나타남
-**재료:** 상태가 바뀌었다는 *사실*은 튀지 않아야 한다 → `Motion.settle`(smooth). 비활성은 `opacity 0.35`, 일시정지는 `0.5`로 숨 참듯.
-**구현:** `.motion(Motion.settle, value:)` (recipes §1·§2). **근거:** [Apple] 기본 bounce 0 + [앱]
-
-### 3. 시트·카드 끌어서 놓기 (칸에 맞춰 멈춤)
-**재료:** 끄는 동안 1:1(애니메이션 없음) → 손을 뗀 *직전 0.1초* 속도로 멈출 자리를 투영 → 가장 가까운 칸 → 남은 거리 대비 상대 속도를 스프링에 넘김 →
-튕겨 던졌을 때만 ζ≈0.82 → 범위 밖은 러버밴딩 → 잡는 순간 *보이던 값*에서 출발.
-**먼저 확인:** iOS/iPadOS의 일반 시트는 `.presentationDetents`가 이미 이 모두를 한다 — 시스템이 하는 것은 다시 만들지 않는다. 커스텀이 꼭 필요할 때만 직접.
-**구현:** `SnapDragExample` · `Physics` · `VelocityTracker` (recipes §11). **근거:** [Apple] 속도 이어받기(WWDC23) + [앱]
-
-### 4. 알약 HUD — Live Peninsula식 (⚠ Apple의 시스템 볼륨·밝기 HUD가 아니다)
-**먼저 알아야 할 것:** 이 항목은 이 앱의 노치 HUD(`HotkeyStatusHUDView`)를 일반화한 것이다. **iPhone·iPad·Mac의 실제 시스템 HUD와는 모양도 움직임도 다르다.**
-"시스템 HUD처럼"이라는 요청에 이 항목을 그대로 적용하지 않는다 — Apple의 실제 HUD는 아직 측정하지 않았다(아래 "기능별" 표). 레퍼런스를 먼저 받는다.
-**재료:** ① 등장은 `present`(smooth) — 키 입력엔 관성이 없다 ② 재질이 *도착*한다(블러+축소+이동+투명도, 출발한 가장자리가 앵커) ③ 나갈 땐 더 빠르게(`exit`)
-④ 아이콘은 이름을 갈아 끼우지 않고 `variableValue`로 흐른다 ⑤ 2초 뒤 사라짐은 `.task(id:)`로 — 입력마다 다시 시작, 뷰가 사라지면 취소 ⑥ 키를 누르고 있어도
-HUD는 한 번만 등장하고 값만 흐른다(HIG: 잦은 상호작용에 모션을 더하지 않는다).
-**알려진 약점 (시뮬레이터 녹화로 확인):** 블러 디졸브라 흐릿하게 번져 보인다 · `SegmentMeter`를 점으로 쓰면 점선처럼 읽힌다(연속 막대나 칸이 낫다) ·
-`.ultraThinMaterial`은 흰 바탕에서 거의 안 보인다(대비·그림자 필요) · 나가는 곡선을 `exit`(0.13초)로 두면 세 프레임에 뚝 사라진다 — 번지는 것보다 낫지만 Apple이 그런다는 보장은 없다.
-**구현:** `Materialize` · `SegmentMeter` · `.task(id:)` (recipes §4·§7). **근거:** [앱] + [Apple HIG]
-
-### 5. Dynamic Island식 확장
-**재료:** ① 너비·높이·모서리가 **같은 스프링 하나**(`morph`)로 ② 나가는 내용이 컨테이너보다 먼저 비워진다 ③ 들어오는 내용은 컨테이너가 벌어진 뒤 내려앉는다(`contentDrop`)
-④ 모서리는 알약(높이/2) ↔ 작은 값, 클립도 같은 값으로.
-Apple의 실제 곡선과 크기는 공개되어 있지 않다. **"비슷하게 보이는 근사"라고 말하고** 크기는 예시값임을 밝힌다.
-**탄성은 미확정이다:** 이 항목의 `morph`(.snappy, 오버슈트 <1%)는 이 앱에서 "튕김 없이 감속감만"으로 수렴한 값이지 Apple 값이 아니다. 실제 Dynamic Island가 더 탄성이 있는지는 측정하지 않았다 —
-스킬 없이 만든 구현은 펼침에 bounce 0.30(오버슈트 약 4.6%)을 썼다. 레퍼런스 녹화 없이는 어느 쪽이 맞는지 말하지 않는다.
-**구현:** `IslandMorph` · `.contentDrop` (recipes §5·§18). **근거:** [앱]
-
-### 6. 램프 요정(genie) — 빨려 들어가고 나옴
-**재료:** 빨려드는 지점에 스케일 고정(앵커) + **세로가 먼저, 가로가 늦게** 자란다(지수 0.6 vs 2.0) + 초반에만 얕은 블러 + 빠르게 불투명해짐.
-진짜 genie는 CoreAnimation이 창에만 적용하는 곡면 워프라 뷰에는 못 쓴다 — 이것은 인상을 재현한 근사다. 뷰는 **항상 마운트**하고 `progress`로 그린다(연타에 안전).
-**구현:** `EmergeFromSource` (recipes §6). **근거:** [앱]
-
-### 7. Liquid Glass 합쳐지고 갈라짐
-**재료:** 유리 요소를 `GlassEffectContainer`로 묶고 `glassEffectID(_:in:)`에 같은 네임스페이스를 주면 상태 변화 때 시스템이 변형한다. 곡선은 `morph`.
-유리는 다른 유리를 샘플링하지 못하므로 가까운 유리는 반드시 컨테이너로 묶는다.
-**주의(macOS, AppKit):** `NSGlassEffectView`는 키 윈도우가 아니면(비활성 패널 등) 유리가 어두운 판처럼 그려질 수 있다 — 패널의 `hasKeyAppearance`를 true로 돌려주는 override로 해결했다 [앱, macOS 27.2에서 관찰].
-**구현:** `GlassMorphMenu` (recipes §14). **근거:** [Apple, WWDC25]
-
-### 8. 숫자가 굴러가고 아이콘이 바뀜
-**재료:** 숫자는 `.numericText(countsDown:)`로 자릿수가 굴러간다(방향이 실제와 맞아야 한다) + `.monospacedDigit()`. 제목·이름 교체는 슬라이드가 아니라 `.opacity`.
-상태가 뒤집히는 아이콘(재생↔일시정지)은 같은 자리에서 `.symbolEffect(.replace)`. 지원되면 iOS 18/macOS 15의 `.replace.magic`.
-**구현:** `TransitionsExample` · `.symbolReplace` (recipes §10). **근거:** [Apple]
-
-### 9. 아이콘이 톡·깜빡·흔들
-**재료:** 직접 회전시키기 전에 심볼 효과를 먼저 찾는다 — `.bounce`(도착), `.pulse`(대기), `.variableColor.iterative`(신호), `.wiggle`·`.breathe`·`.rotate`(iOS 18/macOS 15). `value:`로 한 번, `isActive:`로 계속.
-**구현:** `SymbolEffectsTour` (recipes §15). 한 번 커졌다 돌아오는 강조는 `Pop` (§16). **근거:** [Apple]
-
-### 10. 앱이 열리듯 커지는 전환
-**재료:** 출발 뷰 `matchedTransitionSource`, 도착 뷰 `.navigationTransition(.zoom(sourceID:in:))`, 같은 네임스페이스. 끌어서 닫는 동안의 속도 이어받기까지 시스템이 한다.
-**구현:** `ZoomTransitionExample` (recipes §21, iOS 18). **근거:** [Apple, WWDC24]
-
-### 11. 홈 화면처럼 페이지 넘김
-**재료:** 시스템 페이징(`.scrollTargetBehavior(.paging)`)에 `scrollTransition(.interactive)`로 깊이만 얹는다(옆 페이지가 흐려지며 밀려남). 수동 "도착 스프링"을 더하지 않는다 —
-두 박자가 겹쳐 구려진다. macOS 두 손가락 스와이프는 `DragGesture`에 안 잡힌다.
-**구현:** `PagedDeck` · `PageDepth` (recipes §12). **근거:** [앱]
-
-### 12. 타이머 링 — 시간을 모양으로
-**재료:** 줄어드는 링(남은 양이 호의 길이) · 지나간 자리는 옅게 남김 · 12시 기준 · 도는 동안 `linear(1초)`, 멈췄을 땐 짧은 ease · 멈추면 0.5 투명도.
-**구현:** `CountdownRing` (recipes §8). **근거:** [앱]
-
-### 13. 알림 종이 울림
-**재료:** 꼭대기에 매달려(`anchor: .top`) 흔들리고, **진폭이 한 번씩 줄고**, 한 번 울린 뒤 쉰다. 동작 줄이기에서는 회전 대신 크기가 숨 쉰다.
-**구현:** `DecayingShake` (recipes §9). **근거:** [앱]
-
-### 14. Siri · Apple Intelligence 글로우
-**재료:** ① 혜성 획: 머리가 앞서고 꼬리가 뒤따르며 끝에서 꼬리가 따라잡아 사라진다 ② 같은 획을 세 겹 블러로 쌓은 빛 ③ 도형보다 큰 각도 그라디언트를 선형으로 돌려 테두리로 마스크
-④ 메시 그라디언트를 **서로 다른 주기**로 일렁이게. 끝없는 루프는 동작 줄이기에서 멈춘다(HIG: 지속적 진동 주의).
-Apple의 실제 구현은 비공개 — 이것은 재현이다. **구현:** `CometStroke` · `RotatingGlowBorder` · `LivingMesh` (recipes §19·§20). **근거:** [앱]
-
-### 15. 손글씨 "hello"
-**재료:** 벡터 경로를 `trim`으로 점진적으로 그린다. `CometStroke(tail: 1)`이면 그려진 뒤 지워진다. 경로는 디자인 도구의 벡터를 비율 좌표의 `Shape`로 옮긴 것(이 앱의 `HelloShape`처럼). 곡선은 `easeInOut` 길게(≈4s).
-**구현:** `CometStroke` (recipes §19). **근거:** [앱]
-
-### 16. 끝에서 고무줄, 던지면 더 감
-**재료:** 러버밴딩 `x·d·c / (d + c·x)` (c≈0.55), 모멘텀 투영 `(v/1000)·r/(1−r)` (r≈0.99). 시스템 스크롤은 이미 한다 — 직접 만든 드래그에만 필요.
-**구현:** `Physics` (recipes §11). **근거:** [Apple] 개념(WWDC18) + [SDK/앱] 식
-
-### 17. 손끝 햅틱
-**재료:** 눈금(detent)을 지날 때만, 시각 변화와 같은 프레임에. 큰 눈금은 한 단계 굵게. macOS는 `NSHapticFeedbackManager`(`sensoryFeedback`은 맥에서 대부분 무음 [앱]), 대부분의 iPad엔 햅틱 엔진이 없으니 시각 피드백이 먼저다.
-**구현:** `Haptics` (recipes §13). **근거:** [앱] + [Apple HIG] 햅틱은 모션의 보완 수단
-
-### 18. 시트 — 올라오고, 반만 열리고, 끌어서 닫힘
-**재료:** 전부 시스템 몫이다 — 속도 이어받기, detent에 맞춰 멈춤, 끝에서 러버밴딩, 뒤 화면이 어두워지고 물러남. 직접 만들면 시스템 시트와 박자가 어긋난다.
-**할 일(HIG):** iPhone은 medium detent부터 + grabber, 스와이프로 닫기(저장 안 한 변경이 있을 때만 막고 확인), 완료엔 취소를 짝, 한 번에 하나.
-iPad는 page/form, macOS는 내용에 맞는 고정 크기.
-**구현:** `SystemSheetExample` (recipes §26). **근거:** [Apple] 시스템 컴포넌트 + [HIG Sheets]
-
-### 19. 안 된다는 표시
-**재료:** 아무 반응이 없으면 앱이 멈춘 것으로 읽힌다 [HIG Gestures]. ① 잠긴 물체를 끌면 **조금 따라오다 버틴다**(러버밴딩, 놓으면 제자리 — 움직일 수 없음을 손으로 느낀다)
-② 거절된 입력은 **좌우로 잦아드는 흔들림**(macOS 로그인 창에서 암호가 틀렸을 때 익숙한 그 표현) + iOS는 `failure` 햅틱 ③ 비활성 컨트롤은 처음부터 흐리게(`opacity 0.35`) — 눌러 보고서야 알게 하지 않는다.
-흔들림은 짧게(3–4번 잦아듦), 동작 줄이기에서는 흔들지 않고 테두리·글자 색으로 대신한다.
-**구현:** `Physics.rubberBand` (recipes §11) · `.rejectShake(trigger:)` (recipes §29) · `Haptics.play(meaning: .failure)` (recipes §25).
-**근거:** [HIG Gestures] "안 되는 제스처를 알린다" + [앱] 흔들림 모양은 근사 — Apple의 흔들림 곡선은 측정하지 않았다.
-
-### 20. 포인터를 올렸을 때 (iPadOS · macOS)
-**재료:** iPadOS는 시스템 포인터 효과 — 투명 배경의 작은 요소 highlight, 불투명한 작은 요소 lift(떠오름 + 그림자 + 반사광 + 자석), 큰 요소 hover(틴트만, 크기는 옆과 겹치지 않을 때만).
-macOS는 호버 밝기 `+0.08`과 시스템 커서. 바 버튼은 터치 영역을 이어 붙여 포인터가 깜빡이지 않게.
-**구현:** `.applePointerEffect(_:)` (recipes §24). **근거:** [Apple] `hoverEffect` + [HIG Pointing devices] + [앱] macOS 밝기 값
-
-### 21. 글자·창 크기가 바뀔 때 레이아웃
-**재료:** 옆으로 놓인 것이 큰 글자·좁은 창에서 세로로 쌓인다. `if`로 HStack/VStack을 갈아 끼우면 뷰가 새로 생겨 뚝 바뀐다 → `AnyLayout`으로 정체성을 유지하면 같은 스프링으로 자리가 흐른다.
-판단은 기기 종류가 아니라 size class·글자 크기로 [HIG Layout].
-**구현:** `AdaptiveRow` (recipes §27). **근거:** [Apple] `AnyLayout` + [HIG Layout]
-
-### 22. 목록에 행이 들어오고 나감, 순서 바꾸기
-**재료:** `List`/`ForEach`의 데이터를 `withAnimation(Motion.settle)` 안에서 바꾸면 시스템이 삽입·삭제·이동을 흘린다. 행마다 `.transition`을 직접 달지 않는다(시스템 행 애니메이션과 겹친다, P3).
-스와이프 삭제·편집 모드 순서 바꾸기는 `onDelete`·`onMove`의 시스템 움직임을 쓴다. 계층을 따라 들어간 목록은 돌아왔을 때 **선택한 행이 강조된 채** 남는다.
-**근거:** [Apple] 시스템 List + [HIG Lists and tables]
-
-### 23. 탭 전환, 화면 push/pop
-**재료:** 시스템 `TabView`·`NavigationStack`의 기본 전환을 그대로 쓴다. 탭은 사람이 하루에도 수십 번 누르는 **잦은 상호작용**이라 커스텀 슬라이드·페이드를 더하지 않는다 [HIG Motion].
-push/pop은 가장자리 스와이프로 **도중에 잡아 되돌릴 수 있는** 시스템 전환이다 — 커스텀 전환으로 바꾸면 이 끊을 수 있음을 잃는다(P4). 콘텐츠에서 커지며 열리는 화면만 `.navigationTransition(.zoom)` (항목 10).
-탭 바는 섹션을 옮겨도 항상 보이고, 비어 있는 탭도 숨기지 않는다.
-**근거:** [Apple] 시스템 전환 + [HIG Motion · Tab bars]
-
-### 24. 로딩, 진행 표시
-**재료:** 가능하면 확정형(`ProgressView(value:)`)으로, 진행 속도는 고르게. 표시기는 **멈추지 않는다**(멈춤 = 고장). 불확정 → 확정 전환은 되지만 **스피너 ↔ 막대 전환은 하지 않는다.**
-기다리는 동안 자리표시(`.redacted(reason: .placeholder)`)로 **최대한 빨리 무언가를** 보여 준다. 바로 안 끝나는 버튼 동작은 버튼 안에 스피너.
-실행 화면은 첫 화면과 같게 — 바뀌는 순간 번쩍이지 않게.
-**근거:** [HIG Progress indicators · Loading · Launching]
-
-### 25. 팝오버·패널 크기가 바뀜
-**재료:** 같은 팝오버의 접힌 보기 ↔ 펼친 보기는 **크기를 애니메이션**한다 — 뚝 바뀌면 다른 팝오버로 갈아 끼운 것처럼 보인다 [HIG Popovers]. 너비·높이·모서리는 `Motion.morph` 하나로(P3),
-내용은 나갈 때 빠르게·들어올 때 늦게(P2). HUD 스타일 패널은 작게 유지한다.
-**구현:** `IslandMorph` (recipes §18)와 같은 재료. **근거:** [HIG Popovers · Panels] + [앱]
+Platform guidance behind 18–25 is in [platforms.md](platforms.md).
 
 ---
 
-## 기능별 Apple 동작 — 아직 측정하지 않았다
+### 1. Press — buttons and controls
+**Ingredients:** shrink and dim slightly the instant it's pressed (0.07s) → return on a spring with no bounce on release → on pointer platforms, brighten on hover.
+Show press with `brightness`, not `opacity` — a filled pill that turns translucent looks switched off, not pressed.
+**Implementation:** `PressableStyle` (recipes §3). On Liquid Glass, `.glassEffect(.regular.interactive())` lets the system handle scale, bounce and shimmer [Apple, WWDC25].
+**Grade:** [Approx.] values + [Apple]
 
-알람의 움직임, 타이머의 카운트다운, 스톱워치, 볼륨 HUD는 **서로 다르다.** 각각이 자기만의 곡선·순서·재질을 가지고 있어서, "비슷한 타이머 링"으로 뭉뚱그리면
-애플스럽지 않게 된다. 아래는 **구현 전에 레퍼런스를 측정해야 하는 항목**이다. 확인된 값이 없으므로 기억으로 채우지 않는다.
-측정 방법과 정확도는 [measurement.md](measurement.md). 측정이 끝난 항목은 이 표에서 위의 번호 항목으로 옮기고 값을 적는다.
+### 2. Toggle — a surface appearing
+**Ingredients:** the *fact* that state changed must not bounce → `Motion.settle` (smooth). Disabled dims to `opacity 0.35`, paused to `0.5`, like holding a breath.
+**Implementation:** `.motion(Motion.settle, value:)` (recipes §1, §2). **Grade:** [Apple] default bounce 0 + [Approx.]
 
-| 기능 | 상태 | 측정 우선순위 — 특히 볼 것 |
+### 3. Drag a card and let it snap into place
+**Ingredients:** 1:1 while dragging (no animation) → project the resting point from the velocity of the *last 0.1s* before release → nearest slot → pass velocity relative to the remaining distance to the spring →
+ζ≈0.82 only when flung → rubber-band past the ends → on grab, start from the *visible* position.
+**Check first:** standard iOS/iPadOS sheets already do all of this with `.presentationDetents`. Build it yourself only when a custom surface truly needs it.
+**Implementation:** `SnapDragExample` · `PresentedOffset` · `Physics` · `VelocityTracker` (recipes §11). **Grade:** [Apple] velocity handoff (WWDC23) + [Approx.]
+
+### 4. Pill-shaped status HUD (custom — not Apple's system volume/brightness HUD)
+**Know this first:** this is a *custom* pill HUD pattern. It does **not** reproduce the actual iPhone, iPad or Mac system HUDs, which have their own shape and motion.
+Don't apply it to "make it like the system HUD" — Apple's real HUDs aren't measured yet (see "Per-feature" below). Get a reference first.
+**Ingredients:** ① appear with `present` (smooth) — a key press has no momentum ② the material *arrives* (blur + scale + offset + opacity, anchored at the edge it came from) ③ leave faster (`exit`)
+④ the icon flows with `variableValue` instead of swapping symbol names ⑤ auto-hide after ~2s with `.task(id:)` — restarts on every input, cancels when the view goes away ⑥ while a key is held,
+the HUD appears once and only the value flows (HIG: no added motion on frequent interactions).
+**Known weak spots (seen in recordings):** a blur dissolve can look smeared · dotted `SegmentMeter`s read as a dashed line (a continuous bar or cells read better) ·
+`.ultraThinMaterial` nearly disappears on white (needs contrast and a shadow) · a 0.13s `exit` vanishes in three frames — cleaner than smearing, but not confirmed to be what Apple does.
+**Implementation:** `Materialize` · `SegmentMeter` · `.task(id:)` (recipes §4, §7). **Grade:** [Approx.] + [HIG]
+
+### 5. Like the Dynamic Island — a pill that grows and shrinks
+**Ingredients:** ① width, height and corner radius on **one shared spring** (`morph`) ② outgoing content clears before the container shrinks ③ incoming content settles in after the container opens (`contentDrop`)
+④ the corner goes between capsule (height / 2) and a small radius, and the clip uses the same value.
+Apple hasn't published the real curve or sizes. **Say it's a close reproduction** and that the sizes are examples.
+**Bounce is undecided:** `morph` here (.snappy, overshoot <1%) is a "decelerate without bouncing" choice, not Apple's value. Whether the real Dynamic Island bounces more hasn't been measured;
+a version built without this skill used bounce 0.30 (≈4.6% overshoot). Without a reference recording, don't claim either is right.
+**Implementation:** `IslandMorph` · `.contentDrop` (recipes §5, §18). **Grade:** [Approx.]
+
+### 6. Genie — being sucked in and coming back out
+**Ingredients:** scale pinned to the point it's sucked into (anchor) + **height first, width later** (exponents 0.6 vs 2.0) + a shallow blur only early on + opacity snaps in fast.
+The real genie is a curved warp Core Animation applies to windows only, so views can't use it — this reproduces the impression. Keep the view **always mounted** and draw it from `progress` (safe under rapid taps).
+**Implementation:** `EmergeFromSource` (recipes §6). **Grade:** [Approx.]
+
+### 7. Liquid Glass merging and splitting
+**Ingredients:** put glass elements in a `GlassEffectContainer` and give `glassEffectID(_:in:)` a shared namespace; the system morphs them on state changes. Curve: `morph`.
+Glass can't sample other glass, so nearby glass must share a container.
+**Watch out (macOS, AppKit):** an `NSGlassEffectView` in a window that isn't key (an inactive panel, say) can render as a dark slab — overriding the panel's `hasKeyAppearance` to return true fixes it (observed on macOS 27.2).
+**Implementation:** `GlassMorphMenu` (recipes §14). **Grade:** [Apple, WWDC25]
+
+### 8. Rolling numbers, swapping icons
+**Ingredients:** numbers roll digit by digit with `.numericText(countsDown:)` (the direction must match reality) + `.monospacedDigit()`. Titles and names swap with `.opacity`, not a slide.
+An icon that flips state (play ↔ pause) uses `.symbolEffect(.replace)` in place; `.replace.magic` where iOS 18 / macOS 15 allow.
+**Implementation:** `TransitionsExample` · `.symbolReplace` (recipes §10). **Grade:** [Apple]
+
+### 9. An icon that pops, pulses or wiggles
+**Ingredients:** reach for symbol effects before rotating anything by hand — `.bounce` (arrival), `.pulse` (waiting), `.variableColor.iterative` (signal), `.wiggle` · `.breathe` · `.rotate` (iOS 18 / macOS 15). `value:` for once, `isActive:` for continuous.
+**Implementation:** `SymbolEffectsTour` (recipes §15). A one-off "pop" is `Pop` (§16). **Grade:** [Apple]
+
+### 10. A screen that zooms open from what you tapped
+**Ingredients:** `matchedTransitionSource` on the source, `.navigationTransition(.zoom(sourceID:in:))` on the destination, one namespace. The system also hands off velocity while you drag it closed.
+**Implementation:** `ZoomTransitionExample` (recipes §21, iOS 18). **Grade:** [Apple, WWDC24]
+
+### 11. Paging like the Home Screen
+**Ingredients:** system paging (`.scrollTargetBehavior(.paging)`) with depth added by `scrollTransition(.interactive)` (neighbor pages fade and recede). Don't add a manual "arrival spring" —
+two beats overlap and it feels cheap. On macOS, two-finger swipes never reach `DragGesture`.
+**Implementation:** `PagedDeck` · `PageDepth` (recipes §12). **Grade:** [Apple] paging + [Approx.] depth
+
+### 12. Timer ring — time as shape
+**Ingredients:** a shrinking ring (remaining time is the arc length) · the elapsed part stays faintly visible · starts at 12 o'clock · `linear(1s)` while running, a short ease when stopped · 0.5 opacity when paused.
+**Implementation:** `CountdownRing` (recipes §8). **Grade:** [Approx.]
+
+### 13. A ringing notification bell
+**Ingredients:** hangs from the top (`anchor: .top`), swings with **decaying amplitude**, then rests after each ring. Under Reduce Motion it breathes in size instead of swinging.
+**Implementation:** `DecayingShake` (recipes §9). **Grade:** [Approx.]
+
+### 14. Siri / Apple Intelligence glow
+**Ingredients:** ① a comet stroke: the head leads, the tail follows and catches up at the end ② the same stroke stacked in three blur layers for light ③ an angular gradient larger than the shape, rotated linearly and masked to the border
+④ a mesh gradient drifting at **different periods**. Endless loops stop under Reduce Motion (HIG: avoid sustained oscillation).
+Apple's implementation is private — this is a reproduction. **Implementation:** `CometStroke` · `RotatingGlowBorder` · `LivingMesh` (recipes §19, §20). **Grade:** [Approx.]
+
+### 15. The handwritten "hello"
+**Ingredients:** draw a vector path progressively with `trim`. `CometStroke(tail: 1)` draws it and then erases it. The path is a design-tool vector converted into a `Shape` in unit coordinates. Long `easeInOut` (≈4s).
+**Implementation:** `CometStroke` (recipes §19). **Grade:** [Approx.]
+
+### 16. Rubber-band at the edge, fling to go further
+**Ingredients:** rubber-banding `x·d·c / (d + c·x)` (c≈0.55), momentum projection `(v/1000)·r/(1−r)` (r≈0.99). System scroll views already do this — only hand-built drags need it.
+**Implementation:** `Physics` (recipes §11). **Grade:** [Apple] concept (WWDC18) + [Approx.] constants
+
+### 17. Haptics under the finger
+**Ingredients:** only when crossing a detent, in the same frame as the visual change; larger detents one step stronger. On macOS use `NSHapticFeedbackManager` (`sensoryFeedback` is mostly silent on Mac); most iPads have no haptic engine, so visuals come first.
+**Implementation:** `Haptics` (recipes §13, §25). **Grade:** [HIG] haptics complement motion + [Approx.]
+
+### 18. Sheets — sliding up, half open, swiped away
+**Ingredients:** all of it belongs to the system — velocity handoff, snapping to detents, edge rubber-banding, the background dimming and receding. A hand-built sheet drifts out of step with the system's.
+**Configure (HIG):** on iPhone start at the medium detent with a grabber; support swipe-to-dismiss (block it only with unsaved changes, then confirm); one sheet at a time.
+iPad uses page/form sheets; macOS sheets get a fixed size that fits their content.
+**Implementation:** `SystemSheetExample` (recipes §26). **Grade:** [Apple] + [HIG]
+
+### 19. Saying "no"
+**Ingredients:** no response at all reads as a frozen app [HIG Gestures]. ① dragging something locked **follows a little, then resists** (rubber-band, snaps back on release — you feel that it can't move)
+② rejected input gets **a short side-to-side shake that dies down** (the familiar wrong-password shake) + the `failure` haptic on iOS ③ disabled controls are dimmed up front (`opacity 0.35`) so people don't have to press to find out.
+Keep the shake short (3–4 decaying swings); under Reduce Motion, don't shake — change a border or text color instead.
+**Implementation:** `Physics.rubberBand` (recipes §11) · `.rejectShake(trigger:)` (recipes §29) · `Haptics.play(meaning: .failure)` (recipes §25).
+**Grade:** [HIG] "indicate when a gesture isn't available" + [Approx.] shake curve (Apple's isn't measured)
+
+### 20. Pointer hover (iPadOS, macOS)
+**Ingredients:** on iPadOS, the system pointer effects — highlight for small elements on a transparent background, lift for small opaque ones (rises, shadow, specular, magnetism), hover for large ones (tint; scale only if it won't collide with neighbors).
+On macOS, a `+0.08` hover brightness and system cursors. Make bar-button hit areas contiguous so the pointer doesn't flicker between them.
+**Implementation:** `.applePointerEffect(_:)` (recipes §24). **Grade:** [Apple] `hoverEffect` + [HIG] + [Approx.] macOS brightness
+
+### 21. Layout reflowing for large text or a narrow window
+**Ingredients:** side-by-side views stack vertically at large text sizes or narrow widths. Swapping `HStack`/`VStack` with `if` rebuilds the views and snaps → `AnyLayout` keeps identity, so positions flow on one spring.
+Decide by size class and text size, not device type [HIG].
+**Implementation:** `AdaptiveRow` (recipes §27). **Grade:** [Apple] + [HIG]
+
+### 22. List rows inserting, deleting, reordering
+**Ingredients:** change the `List`/`ForEach` data inside `withAnimation(Motion.settle)` and the system flows inserts, deletes and moves. Don't add a `.transition` per row (it fights the system's row animation).
+Swipe-to-delete and edit-mode reordering use the system motion of `onDelete` / `onMove`. A drill-down list keeps the **selected row highlighted** when you come back.
+**Grade:** [Apple] + [HIG]
+
+### 23. Switching tabs, pushing and popping screens
+**Ingredients:** use the default transitions of `TabView` and `NavigationStack`. Tabs are a **frequent interaction**, so don't add custom slides or fades [HIG].
+Push/pop is a system transition that can be **grabbed mid-way and reversed** with the edge swipe — a custom transition loses that interruptibility. Only screens that grow out of content use `.navigationTransition(.zoom)` (entry 10).
+**Grade:** [Apple] + [HIG]
+
+### 24. Loading and progress
+**Ingredients:** determinate (`ProgressView(value:)`) whenever possible, advancing evenly. Indicators **never stop moving** (stopped = broken). Indeterminate → determinate is fine; **spinner ↔ bar is not.**
+Show **something as soon as possible** while waiting (`.redacted(reason: .placeholder)`). A button whose action doesn't finish instantly shows a spinner inside the button.
+The launch screen matches the first screen so nothing flashes at the hand-off.
+**Grade:** [HIG]
+
+### 25. A popover or panel changing size
+**Ingredients:** a popover switching between compact and expanded views **animates its size** — an instant jump looks like a different popover replaced it [HIG]. Width, height and corners share `Motion.morph`;
+content leaves fast and arrives late. Keep HUD-style panels small.
+**Implementation:** same ingredients as `IslandMorph` (recipes §18). **Grade:** [HIG] + [Approx.]
+
+---
+
+## Per-feature Apple motion — not measured yet
+
+The alarm, the timer countdown, the stopwatch and the volume HUD **all move differently.** Each has its own curves, order and materials, and lumping them into "a timer ring like that"
+is exactly what stops it feeling like Apple. These need a **reference measured before building**. There are no confirmed values, so don't fill them in from memory.
+How to measure, and how accurate it is: [measurement.md](measurement.md). Once measured, move the entry up into the numbered list with its values.
+
+| Feature | Status | What to measure first |
 | --- | --- | --- |
-| iOS 볼륨 HUD | **미측정** | 위치·크기·모양(채움이 어떻게 차오르나) / 등장·퇴장 방향과 시간 / 최대·최소에서의 반응 / 값이 바뀔 때 채움의 곡선 / 재질(라이트·다크) |
-| macOS 볼륨·밝기 HUD | **미측정** | 위치(OS 버전마다 다를 수 있다) / 칸 모양 / 등장·퇴장 시간 / 키를 누르고 있을 때 |
-| 시계 > 타이머 | **미측정** | 카운트다운 중 링이 줄어드는 곡선(선형인가) / 숫자가 갱신되는 방식 / 시작·일시정지 버튼의 전환 / 끝났을 때 |
-| 시계 > 알람 | **미측정** | 알람이 울릴 때 화면·아이콘의 움직임 / 켜고 끄는 토글 / 시간 선택 휠의 감속 |
-| 시계 > 스톱워치 | **미측정** | 랩이 목록에 들어오는 방식 / 시계 바늘·숫자의 갱신 |
-| AirPods 연결 팝업 | **미측정** | 아래에서 올라오는 시트의 곡선 / 3D 모델의 등장 / 닫힘 |
-| 충전 연결 표시 | **미측정** | 아이콘·링이 차오르는 시간과 곡선 / 색 전환 |
-| 컨트롤 센터 토글 | **미측정** | 눌림 크기 / 켜질 때 색·아이콘 전환 / 길게 눌러 확장될 때의 모양 변화 |
+| iOS volume HUD | **Unmeasured** | position, size, shape (how the fill rises) / entry and exit direction and timing / response at max and min / the fill curve as the value changes / material (light, dark) |
+| macOS volume/brightness HUD | **Unmeasured** | position (may differ by OS version) / cell shape / entry and exit timing / holding the key down |
+| Clock › Timer | **Unmeasured** | whether the ring shrinks linearly during the countdown / how digits update / the start-pause button transition / what happens at zero |
+| Clock › Alarm | **Unmeasured** | screen and icon motion when it rings / the on-off toggle / deceleration of the time wheel |
+| Clock › Stopwatch | **Unmeasured** | how laps enter the list / how the hands and digits update |
+| AirPods pairing card | **Unmeasured** | the curve of the card rising from the bottom / the 3D model's entrance / dismissal |
+| Charging indicator | **Unmeasured** | how long the icon or ring takes to fill, and its curve / color change |
+| Control Center toggles | **Unmeasured** | press scale / color and icon change when turning on / the shape change on long-press expansion |
 
-사용자가 위 기능 중 하나를 "애플처럼"이라고 하면: ① 먼저 레퍼런스 녹화를 요청한다 ② 측정한다 ③ 측정 전에는 **"이 동작은 아직 측정하지 않았다"**고 말하고,
-이 앱의 근사 구현(번호 항목)을 쓴다면 근사라고 밝힌다.
+When someone asks for one of these "like Apple": ① ask for a reference recording ② measure it ③ until then, say **"this one hasn't been measured yet"**,
+and if you use a numbered entry as a stand-in, say it's an approximation.

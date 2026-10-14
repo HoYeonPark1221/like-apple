@@ -1,173 +1,137 @@
-# 플랫폼과 앱 구조 — iOS · iPadOS · macOS를 HIG대로
+# Platforms — how motion and feel differ on iOS · iPadOS · macOS
 
-움직임 하나하나가 Apple다워도, **그 플랫폼의 관례에서 벗어나면** 앱 전체가 애플스럽지 않다. iPhone에서 자연스러운 것이 Mac에서는 어색하고
-(호버가 없는 버튼), Mac에서 자연스러운 것이 iPad에서는 빠져 있다(포인터 효과). 이 문서는 Apple HIG에서 **느낌·모션·크기에 닿는 규칙**만 골라
-플랫폼별·컴포넌트별로 모았다. 코드는 [recipes.md](recipes.md), 치수는 [metrics.md](metrics.md).
+Motion that's right on one platform can feel wrong on another: a Mac button with no hover, an iPad control that ignores the pointer.
+This collects only the HIG guidance that changes **how things move or feel** on each platform. Code: [recipes.md](recipes.md). Sizes: [metrics.md](metrics.md).
 
-근거 표기: **[HIG]** Apple Human Interface Guidelines 본문(2026-10 기준, 페이지 이름을 함께 적음) · **[SDK]** 이 맥의 SDK로 타입체크 확인 · **[앱]** Live Peninsula에서 확인.
-범위는 iOS · iPadOS · macOS다. watchOS · visionOS · tvOS는 다루지 않는다.
+Grades: **[HIG]** Apple Human Interface Guidelines (page named) · **[SDK]** typechecked on the SDK.
+Scope: iOS, iPadOS and macOS.
 
 ---
 
-## 1. 세 플랫폼의 성격 [HIG Designing for iOS · iPadOS · macOS]
+## 1. Three platforms, three hands [HIG Designing for iOS · iPadOS · macOS]
 
 | | iOS | iPadOS | macOS |
 | --- | --- | --- | --- |
-| 화면·거리 | 중간 화면, 30–60cm | 큰 화면, 1m 이내. 들거나 세워 둔다 | 큰 화면(+외부 디스플레이), 30cm–1m, 책상 위 |
-| 입력 | 멀티터치, 가상 키보드, 음성 | 터치 + 키보드 + 포인터 + Apple Pencil을 **섞어서** | 키보드 + 마우스/트랙패드가 기본 |
-| 사용 시간 | 1–2분 확인부터 1시간 이상까지 | 빠른 동작부터 몇 시간 몰입까지 | 몇 분부터 몇 시간 집중까지 |
-| 앱 구조가 기대하는 것 | 화면에 컨트롤을 적게, 부차적인 건 한 번에 닿게. **손이 닿는 아래·가운데**에 컨트롤 | 큰 화면으로 콘텐츠를 올리고 **모달과 전체 화면 전환을 줄인다** | 덜 중첩된 단계, 모달 최소화, **메뉴 막대에 모든 명령**, 단축키, 창 크기 조절·전체 화면 |
-| 모션이 특히 신경 쓸 것 | 한 손 제스처(가장자리 스와이프 뒤로 가기, 행 스와이프) | 창 크기가 수시로 바뀜 — 고정 pt 가정 금지. 포인터 효과 | 활성/비활성 창 전환이 부드럽게. 호버가 필수 |
+| Input | Multi-Touch, direct | touch + keyboard + pointer + Apple Pencil, **mixed** | keyboard + mouse/trackpad |
+| Window | fixed screen | resizes freely (multitasking) | resizable windows, multiple displays |
+| What motion must respect | one-handed gestures (edge-swipe back, row swipes) | pointer effects; window size changes constantly — never assume fixed points | hover before click; smooth active/inactive window transitions |
 
-**Liquid Glass의 반응 강도는 입력에 따라 다르다** [HIG Motion]: 직접 터치하면 촉감을 살리려 더 크게 반응하고, 트랙패드로 조작하면 더 차분하게 반응한다.
-커스텀 모션도 같은 원칙을 따른다 — 손가락이 직접 누르는 iPhone·iPad는 눌림이 분명하게, 포인터로 누르는 Mac은 한 단계 얌전하게.
+**Liquid Glass responds differently by input** [HIG Motion]: strongly to direct touch, to feel tactile, and more calmly to a trackpad.
+Custom motion follows the same idea — a clear press response where a finger touches the screen directly, one step calmer where a pointer clicks.
 
 ---
 
-## 2. 입력 수단별 규칙
+## 2. Rules by input
 
-### 터치 (iOS · iPadOS) [HIG Gestures]
-- **표준 제스처는 표준 의미로.** 탭 = 활성화·선택, 스와이프 = 동작 드러내기·닫기·스크롤, 끌기 = 이동, 길게 누르기 = 추가 기능. 익숙한 제스처에 앱만의 동작을 붙이지 않는다.
-- **시스템 제스처와 겹치지 않는다.** 화면 가장자리(뒤로 가기, 홈, 알림 센터, 제어 센터)에서 시작하는 커스텀 드래그를 만들지 않는다.
-  iOS·iPadOS가 따로 기대하는 제스처: 세 손가락 좌우 스와이프(실행 취소/다시 실행), 세 손가락 집기(복사/붙여넣기), 네 손가락 스와이프(iPad 앱 전환), 흔들기(실행 취소).
-- **제스처는 가능한 한 즉시 반응하고**, 하는 도중에 결과를 예측할 수 있게 보여 준다(얼마나 더 끌어야 하는지). → P7, recipes §11
-- **안 되는 제스처는 안 된다고 보여 준다.** 잠긴 물체를 끌면 잠겼다는 표시를 한다(아무 반응이 없으면 앱이 멈춘 것으로 읽힌다). → catalog §19
-- 커스텀 제스처는 **유일한 방법이 되지 않게** — 같은 일을 버튼·메뉴·키보드로도 할 수 있어야 한다.
+### Touch (iOS · iPadOS) [HIG Gestures]
+- **Standard gestures keep standard meanings.** Tap activates or selects, swipe reveals or dismisses or scrolls, drag moves, long-press reveals more. Don't attach app-specific actions to familiar gestures.
+- **Don't collide with system gestures.** No custom drags that start at a screen edge (back, Home, Notification Center, Control Center).
+- **Respond during the gesture**, and show what will happen (how far is left to go). → P7, recipes §11
+- **Show when a gesture isn't available.** Dragging a locked object should visibly resist; no response at all reads as a frozen app. → catalog 19
+- A custom gesture must **never be the only way** — the same action works from a button, a menu or the keyboard.
 
-### 포인터 (iPadOS · macOS) [HIG Pointing devices]
-- **iPadOS 포인터 효과**: 배경이 투명한 작은 요소 → highlight, 불투명한 작은 요소 → lift, 큰 요소 → hover(틴트·크기·그림자 직접 지정).
-  highlight와 lift에는 **자석 효과**가 있어 포인터가 요소 중심으로 끌려간다. hover에는 없다 — 포인터 모양이 그대로인데 끌려가면 조종을 뺏긴 느낌이다. → recipes §24
-- **표 행처럼 이웃과 붙은 요소는 크기를 키우지 않는다**(겹친다) — 틴트만. 그림자만 주고 크기를 안 키우면 떠오른 것처럼 보이지 않는다.
-- **바 버튼들의 터치 영역은 틈 없이 이어 붙인다** — 틈이 있으면 지나갈 때 포인터가 기본 모양으로 깜빡인다.
-- lift를 받는 비표준 모양(원 등)은 **모서리 반경을 알려 줘야** 포인터가 그 모양으로 이음매 없이 변한다(`contentShape(.hoverEffect, ...)`).
-- 자동으로 숨는 컨트롤(전체 화면 영상의 재생 컨트롤, 줄어든 툴바)은 **포인터를 가져가면 다시 나타나게** 한다.
-- 장식용 포인터 효과를 만들지 않는다. 포인터에 설명 글자를 붙이지 않는다.
-- **macOS 커서는 의미가 정해져 있다**: 화살표, 펼친 손(끌어서 옮길 수 있음), 쥔 손(옮기는 중), I빔(글자), 가리키는 손(링크), 크기 조절 화살표, 금지(여기 놓을 수 없음), 복사(Option 끌기).
-  직접 그리지 말고 시스템 커서를 쓴다(macOS 15+ `.pointerStyle`, 그 아래는 `NSCursor`).
-- **macOS 트랙패드 시스템 제스처를 재정의하지 않는다** — 페이지 사이 스와이프, Mission Control, 앱 Exposé, 전체 화면 앱 전환, 알림 센터. 사용자가 손가락 조합을 바꿀 수도 있다.
-  두 손가락 가로 스와이프는 *스크롤 이벤트*라 `DragGesture`에 잡히지 않는다 → P8, recipes §12.
+### Pointer (iPadOS · macOS) [HIG Pointing devices]
+- **iPadOS pointer effects:** small element on a transparent background → highlight; small opaque element → lift; large element → hover (tint, scale, shadow you choose).
+  Highlight and lift have **magnetism** that pulls the pointer to the center; hover doesn't — a pointer that keeps its shape and still gets pulled feels like losing control. → recipes §24
+- **Don't scale elements that touch their neighbors** (table rows) — tint only. Shadow without scale doesn't look lifted.
+- Give non-standard shapes that receive lift **their corner radius** so the pointer morphs into them seamlessly (`contentShape(.hoverEffect, ...)`).
+- Controls that auto-hide (full-screen video controls, a minimized toolbar) **reappear when the pointer moves to them.**
+- No decorative pointer effects; no instructional text on the pointer.
+- **macOS cursors have fixed meanings:** arrow, open hand (can drag), closed hand (dragging), I-beam (text), pointing hand (link), resize arrows, not-allowed (can't drop here), copy (Option-drag).
+  Use system cursors (`.pointerStyle` on macOS 15+, `NSCursor` below), never draw your own.
+- **Don't redefine macOS trackpad system gestures** — swipe between pages, Mission Control, App Exposé, swipe between full-screen apps, Notification Center.
+  Two-finger horizontal swipes are *scroll events* and never reach `DragGesture` → P8, recipes §12.
 
-### 키보드 (전 플랫폼)
-- 모든 핵심 기능이 키보드만으로 된다(Full Keyboard Access). macOS는 **툴바의 모든 항목이 메뉴 막대 명령으로도** 있어야 한다(툴바는 숨기거나 바꿀 수 있으므로) [HIG Toolbars].
-- 알림·시트는 **Esc / ⌘.** 로 취소된다. 기본 버튼은 Return [HIG Alerts · Buttons].
-- 키를 누르고 있어 값이 계속 바뀌면 등장은 한 번, 값만 흐른다 → P4, catalog §4.
+### Keyboard (all platforms)
+- While a held key keeps changing a value, the element appears once and only the value flows → P4.
 
 ---
 
-## 3. 햅틱 — 플랫폼마다 가진 패턴이 다르다 [HIG Playing haptics]
+## 3. Haptics — each platform has different patterns [HIG Playing haptics]
 
-공통 원칙: **문서화된 의미대로만**, 일관되게(같은 패턴 = 같은 원인), 시각·소리와 **세기와 날카로움을 맞춰**, 남용하지 않고(있는 줄 모르다가 끄면 아쉬운 정도),
-짧은 사건에 짧게, **끌 수 있게**. 카메라·자이로·마이크를 쓰는 순간을 방해하지 않는다.
+Shared rules: use patterns **for their documented meaning**, consistently (same pattern = same cause), **matching intensity and sharpness** to the visual,
+sparingly (unnoticed until it's gone), short for discrete events, and **optional**. Don't disturb moments that use the camera, gyroscope or microphone.
 
-| | 가진 것 | 쓰는 때 |
+| | What exists | When |
 | --- | --- | --- |
-| **iOS** | 표준 컨트롤(토글·슬라이더·피커)이 이미 울린다 · `notification`(작업 결과: 성공·경고·실패) · `impact`(물리 은유: 제자리에 딸깍, 무거운 것이 부딪힘) · `selection`(값이 바뀌는 중) | 표준 컨트롤에는 직접 더하지 않는다(겹친다) |
-| **iPadOS** | 대부분 햅틱 엔진이 없다. 일부 트랙패드·Apple Pencil Pro는 있다 | 햅틱에 기대지 않는다. 시각 피드백이 먼저 |
-| **macOS** | Force Touch 트랙패드에서 **드래그 중이나 포스 클릭 때만**: `alignment`(정렬됨, 원하는 위치, 처음·끝·최소·최대 도달) · `levelChange`(누르는 압력 단계) · `generic` | 작업 결과를 진동으로 알리는 패턴은 없다 → 화면으로 |
+| **iOS** | standard controls (toggles, sliders, pickers) already play haptics · `notification` (outcome: success, warning, failure) · `impact` (physical metaphor: snap into place, heavy collision) · `selection` (value changing) | don't add your own on top of standard controls |
+| **iPadOS** | most have no haptic engine; some trackpads and Apple Pencil Pro do | don't rely on haptics; visuals first |
+| **macOS** | Force Touch trackpad, **only during a drag or force click**: `alignment` (aligned, preferred position, reached start/end/min/max) · `levelChange` (pressure levels) · `generic` | no pattern for outcomes → show them on screen |
 
-코드: recipes §13(`Haptics.play`) · §25(`Haptics.play(meaning:)`). macOS에서 `.sensoryFeedback`은 대부분 무음이다 [앱].
-
----
-
-## 4. 레이아웃과 적응 [HIG Layout]
-
-- **기기 종류·방향이 아니라 size class(실제 공간)로 레이아웃을 정한다.** iPad 창은 자유롭게 바뀌고, iPhone 앱은 Mac의 iPhone 미러링에서 크기가 바뀐다.
-- **크기가 바뀌어도 기능은 같게**, 보이는 양만 바꾼다. 넓으면 탭 바 → 사이드바, 오버플로 메뉴 항목을 밖으로.
-- **글자가 커지면** 옆으로 놓인 뷰를 세로로 쌓고, 행은 높이가 늘어난다(잘리거나 겹치지 않게). → recipes §27 (`AnyLayout`으로 자리가 흐르게)
-- **가장 큰 레이아웃과 가장 작은 레이아웃부터** 미리 본다(가장 큰 글자 크기 포함).
-- **안전 영역을 지킨다** — Dynamic Island, 상태 막대, 툴바, 탭 바가 가리지 않는 영역.
-- 컨트롤과 콘텐츠를 구분할 때 **배경색을 깔지 말고** Liquid Glass + scroll edge effect를 쓴다. 전면 배경은 사이드바·툴바·탭 바 밑까지 채운다.
-- **macOS**: 창 맨 아래에 중요한 컨트롤·정보를 두지 않는다(창을 화면 아래로 걸쳐 둔다). 카메라 하우징(노치) 뒤 위쪽 가장자리에 내용을 두지 않는다.
-- 같은 방향의 스크롤 뷰를 겹치지 않는다(가로 안의 세로는 괜찮다) [HIG Scroll views].
+Code: recipes §13 (`Haptics.play`) · §25 (`Haptics.play(meaning:)`). `.sensoryFeedback` is mostly silent on macOS.
 
 ---
 
-## 5. 재질 — Liquid Glass와 표준 재질 [HIG Materials]
+## 4. Layout changes [HIG Layout]
 
-| | Liquid Glass | 표준 재질 |
+- **Decide by size class (actual space) and text size, not device type or orientation.** iPad windows resize freely; iPhone apps resize in iPhone Mirroring on the Mac.
+- **Keep functionality the same as space changes**; change only how much is visible.
+- At **large text sizes**, side-by-side views stack vertically and rows grow. → recipes §27 (`AnyLayout` so positions flow instead of snapping)
+- Respect **safe areas** — the Dynamic Island, status bar, toolbars and tab bars.
+- Separate controls from content with Liquid Glass and a scroll edge effect, **not a background color**; extend full-screen backgrounds under sidebars, toolbars and tab bars.
+
+---
+
+## 5. Materials — Liquid Glass vs standard materials [HIG Materials]
+
+| | Liquid Glass | Standard materials |
 | --- | --- | --- |
-| 층 | **기능 층**: 툴바, 탭 바, 사이드바, 떠 있는 컨트롤 | **콘텐츠 층**: 앱 배경, 카드, 콘텐츠 안의 구분 |
-| 종류 | regular(대부분. 글자가 많은 알림·사이드바·팝오버) · clear(사진·영상 위에서만. 밝은 바탕엔 35% 딤) | iOS: ultraThin · thin · regular · thick / macOS: 용도별 `NSVisualEffectView.Material` |
-| 규칙 | 콘텐츠 층에 쓰지 않는다(예외: 만지는 동안만 유리가 되는 슬라이더·토글). 커스텀 컨트롤에는 **아껴서** | **보이는 색이 아니라 의미로** 고른다(설정에 따라 모양이 바뀐다). 위에는 vibrant 색 |
+| Layer | **functional layer**: toolbars, tab bars, sidebars, floating controls | **content layer**: app backgrounds, cards, structure within content |
+| Variants | regular (most cases; text-heavy alerts, sidebars, popovers) · clear (only over photos and video; 35% dim on bright content) | iOS: ultraThin · thin · regular · thick / macOS: purpose-specific `NSVisualEffectView.Material` |
+| Rules | not in the content layer (exception: sliders and toggles that turn glass while touched); **sparingly** on custom controls | choose **by meaning, not apparent color** (settings change their look); use vibrant colors on top |
 
-- 두꺼운 재질은 대비가 좋아 가는 글자에, 얇은 재질은 뒤 맥락을 남긴다. iOS에서 thin·ultraThin 위에 quaternary 라벨은 대비가 모자라 쓰지 않는다.
-- macOS 블렌딩 모드: **behind window**(창 뒤 데스크톱이 비침) vs **within window**(창 안 콘텐츠가 비침).
-- 사용자 설정(투명도 줄이기, 대비 높이기, Liquid Glass 모양 선택)에 따라 유리 모양이 바뀐다 — 고정된 모양을 가정하지 않는다. → P11
-- 툴바·바 버튼의 라벨 색을 콘텐츠 배경과 비슷하게 하지 않는다. 콘텐츠가 화려하면 바는 기본 단색으로 [HIG Tab bars · Toolbars · Buttons].
-- 코드: recipes §14(유리 합쳐짐), §28(층 나누기).
+- Thicker materials give better contrast for fine text; thinner ones keep more context visible behind.
+- Glass changes with Reduce Transparency, Increase Contrast and the user's Liquid Glass appearance setting — never assume one fixed look. → P11
+- Code: recipes §14 (merging glass), §28 (layering).
 
 ---
 
-## 6. 컴포넌트별 — 모션과 느낌에 닿는 규칙
+## 6. System components — configure them, don't rebuild their motion
 
-시스템 컴포넌트는 움직임을 이미 갖고 있다. **할 일은 다시 만드는 게 아니라 HIG대로 설정하는 것**이다 (P8).
+System components already move correctly. **The job is to configure them per HIG, not rebuild them** (P8).
 
-### 시트 [HIG Sheets] → recipes §26
-- iPhone: **medium detent**로 먼저, 크기 조절 가능하면 **grabber**. **스와이프로 닫기 지원** — 저장 안 한 변경이 있을 때만 확인.
-- 한 번에 하나. 완료에는 **취소를 짝지운다**. 길거나 복잡한 흐름은 시트 대신 전체 화면 모달.
-- iPad: page / form 스타일. macOS: 내용에 맞는 **기본 크기**(보통 크기 조절 안 함), 시트가 열려도 다른 창은 쓸 수 있게. 반복 입력은 패널.
+### Sheets [HIG Sheets] → recipes §26
+- iPhone: start at the **medium detent**, show a **grabber** when resizable, **support swipe-to-dismiss** — confirm only when there are unsaved changes.
+- One sheet at a time. iPad uses page/form sheets. macOS sheets get a fixed size that fits their content; for repeated input, use a panel.
 
-### 탭 바 [HIG Tab bars]
-- **이동용이지 동작용이 아니다**(동작은 툴바). 섹션을 옮겨도 **항상 보인다**(모달이 덮을 때만 예외).
-- 내용이 없어도 탭을 **숨기거나 비활성화하지 않는다** — 인터페이스가 불안정해 보인다. 빈 이유를 설명한다.
-- 라벨은 한 단어, SF Symbols 아이콘. 배지는 꼭 필요한 정보에만. iPad는 사이드바로 바꿀 수 있게, 사용자가 탭을 고르게.
+### Tab bars and navigation [HIG Tab bars · Toolbars]
+- Keep the tab bar **visible** across sections; don't hide or disable tabs when a section is empty — the interface looks unstable.
+- No custom slide or fade between tabs — it's a frequent interaction.
+- iOS large titles shrink into standard titles as content scrolls; use the system transition.
+- Push/pop is interruptible by the edge swipe; a custom transition loses that. → catalog 23
 
-### 툴바와 내비게이션 [HIG Toolbars]
-- 표준 **뒤로·닫기** 버튼과 표준 심볼(글자 라벨 대신). iOS는 **큰 제목**이 스크롤에 따라 작은 제목으로 바뀌는 시스템 전환을 쓴다.
-- 핵심 동작(완료·제출) **하나만** prominent, trailing 쪽. 묶음은 **최대 세 개**. 글자 라벨 버튼과 심볼 버튼을 붙여 놓지 않는다(하나로 보인다).
-- 테두리 있는 심볼(원 안의 아이콘) 대신 시스템 심볼을 테두리 없이. 툴바 배경·틴트는 줄이고 scroll edge effect로.
-- 표준 컴포넌트는 **바 모서리와 동심** — 커스텀 컴포넌트도 동심으로(recipes §23).
-- 집중 모드로 툴바를 잠시 숨길 수 있지만, **다시 꺼낼 확실한 방법**을 둔다.
+### Popovers [HIG Popovers]
+- **Animate size changes** — an instant jump looks like a different popover replaced it. (`Motion.morph`)
+- On iPhone (compact), use a sheet or full screen instead of a popover.
 
-### 팝오버 [HIG Popovers]
-- 화살표는 띄운 요소를 정확히 가리키고, 그 요소를 덮지 않는다. **한 번에 하나**, 팝오버에서 팝오버를 띄우지 않는다.
-- **크기를 바꿀 때는 애니메이션한다** — 뚝 바뀌면 새 팝오버로 갈아 끼운 것처럼 보인다. (`Motion.morph`)
-- 바깥을 눌러 닫혀도 **작업을 저장**한다(취소 버튼으로만 버린다). 경고는 팝오버가 아니라 알림으로.
-- iPhone(compact)에서는 팝오버 대신 전체 화면이나 시트. macOS는 팝오버를 패널로 떼어 낼 수 있게(모양은 거의 그대로).
+### Lists [HIG Lists and tables]
+- A drill-down list keeps the selected row **highlighted** when you come back; a toggling row highlights briefly, then shows a checkmark.
+- Insert, delete and reorder through the system (`withAnimation` on the data, `onDelete`, `onMove`), not per-row transitions.
 
-### 알림 · 피드백 [HIG Alerts · Feedback]
-- 알림은 **드물게**, 중요하고 행동할 수 있는 것만. 실행 취소 가능한 흔한 삭제에는 띄우지 않는다. **앱 시작 시 띄우지 않는다.**
-- 버튼은 결과를 말하는 동사("삭제", "모두 보기") — 확인 알림에 "확인/OK"를 쓰지 않는다. 기본 버튼은 trailing(가로) 또는 맨 위(세로). 취소는 기본 버튼이 아니다.
-- 상태 피드백은 **그 항목 가까이** 화면 안에 녹인다. 중요한 작업의 완료는 확인해 준다(Apple Pay 결제처럼).
-- 안 되는 명령은 왜 안 되는지 알려 준다.
+### Progress, loading, launch [HIG Progress indicators · Loading · Launching]
+- Prefer **determinate**, advancing evenly — 90% in five seconds and the last 10% in five minutes destroys trust.
+- Indicators **keep moving**; a stopped indicator reads as a stalled app.
+- Indeterminate → determinate is fine; **spinner ↔ bar is not.**
+- **Show something as soon as possible** (placeholders); let people do other things while waiting.
+- The launch screen **matches the first screen** so nothing flashes at the hand-off. Restore previous state, including scroll position.
 
-### 목록 · 표 [HIG Lists and tables]
-- 계층을 따라 이동하는 목록은 선택한 행을 **계속 강조**(돌아왔을 때 어디서 왔는지), 상태를 바꾸는 행은 잠깐 강조 후 체크 표시.
-- 순서 바꾸기·삭제는 시스템 편집 모드의 움직임을 쓴다(`onMove`, `onDelete`). 행 삽입·삭제는 `withAnimation`으로 상태를 바꾸면 시스템이 자리를 흘린다.
-- macOS: 열 머리 클릭으로 정렬(다시 누르면 반대), 열 너비 조절, 계층 데이터는 outline view.
+### Toggles and sliders [HIG Toggles · Sliders]
+- State differences can't rely on **color alone** — change fill, shape or add a checkmark too.
+- On macOS, show results **live** while a slider moves (like the Dock size slider).
 
-### 진행 · 로딩 · 실행 [HIG Progress indicators · Loading · Launching]
-- **가능하면 확정형**(얼마나 남았는지). 진행 속도는 고르게 — 5초에 90%, 나머지 10%에 5분이면 믿음을 잃는다.
-- 표시기는 **계속 움직인다** — 멈춘 표시기는 멈춘 앱으로 읽힌다. 멈췄다면 왜인지 알려 준다.
-- 불확정 → 확정으로는 바꿔도, **원형(스피너) ↔ 막대로는 바꾸지 않는다.**
-- **무언가를 최대한 빨리 보여 준다**(자리표시 글자·그림). 기다리는 동안 다른 일을 할 수 있게.
-- 실행 화면은 **첫 화면과 거의 같게**(바뀌는 순간 번쩍이지 않게), 글자·로고·광고 없이. 다시 열면 **이전 상태를 복원**(스크롤 위치까지).
-- macOS: 배경 작업이나 좁은 자리엔 스피너, 스피너에 라벨을 달지 않는다.
+### Buttons [HIG Buttons]
+- **A custom button always has a pressed state** — without one, people wonder whether it registered. → P12, recipes §3
+- An action that doesn't finish instantly shows a **progress indicator inside the button** (iOS, iPadOS).
 
-### 토글 · 슬라이더 [HIG Toggles · Sliders]
-- iOS 스위치는 **목록 행 안에서만**. 목록 밖에서는 토글처럼 동작하는 버튼(켜지면 강조 배경).
-- 상태 차이는 **색 하나에만 기대지 않는다**(채움, 모양, 체크 표시).
-- 슬라이더: 최소는 leading·아래, 최대는 trailing·위. macOS는 값이 바뀌는 동안 **실시간 결과**를 보여 준다(Dock 크기 슬라이더처럼).
-- iOS에서 볼륨은 슬라이더로 만들지 않고 시스템 볼륨 뷰를 쓴다.
-
-### 버튼 [HIG Buttons]
-- **커스텀 버튼에는 반드시 눌림 상태**가 있다 — 없으면 입력을 받는지 의심한다. → P12, recipes §3
-- 선호하는 선택은 **크기가 아니라 스타일**(prominent)로 구분한다. 크기가 다른 버튼을 나란히 두면 어색하다.
-- 파괴적 동작에는 primary(기본) 역할을 주지 않는다 — 안 읽고 누르기 쉽다.
-- 바로 끝나지 않는 동작은 **버튼 안에 진행 표시기**(iOS·iPadOS).
-
-### 창 · 패널 · 분할 뷰 [HIG Windows · Panels · Split views] (iPadOS · macOS)
-- 시스템 창 프레임·컨트롤을 흉내 내지 않는다 — 조금만 어긋나도 고장 나 보인다. iPadOS 창 컨트롤이 leading 툴바 버튼을 가리지 않게.
-- **HUD 스타일 패널은 작게, 색은 조금만**, 조정하는 콘텐츠를 가리지 않게. 전체 화면에서 HUD를 쓰면 나와서도 유지.
-- 분할 뷰: 각 칸의 현재 선택을 계속 강조. 숨긴 칸을 다시 여는 방법을 여러 개(툴바 버튼, 메뉴, 단축키). macOS 구분선은 얇게(1pt).
+### Windows and panels (iPadOS · macOS) [HIG Windows · Panels]
+- Don't imitate system window frames or controls — slightly off looks broken.
+- **HUD-style panels stay small** and don't cover the content they adjust.
 
 ---
 
-## 7. 접근성 중 모션·크기에 닿는 것 [HIG Accessibility]
+## 7. Accessibility that touches motion [HIG Accessibility]
 
-- **동작 줄이기**: P11 참고. HIG가 따로 경고하는 것 — 빠르게 움직이거나 깜빡이는 애니메이션은 어지럼증과 발작을 일으킬 수 있다.
-- **시간 제한이 있는 요소를 줄인다**: 일정 시간 뒤 저절로 사라지는 뷰는 정보를 처리하는 데 시간이 더 필요한 사람과 보조 기술 사용자에게 문제다.
-  자동으로 사라지는 HUD·토스트에는 **중요한 정보나 유일한 동작을 넣지 않고**, VoiceOver가 켜져 있으면 더 오래 두거나 직접 닫게 한다.
-- **글자 200%까지**, 대비(17pt 이하 4.5:1, 18pt·굵은 글자 3:1), **색만으로 정보를 전하지 않는다.**
-- 컨트롤 크기와 **간격도 크기만큼 중요**하다(베젤 있으면 ~12pt, 없으면 ~24pt). → [metrics.md](metrics.md)
-- 자주 하는 동작은 **가장 단순한 제스처로**, 제스처 대신 화면 안 버튼으로도 되게. 소리 신호에는 햅틱과 시각 신호를 짝지운다.
+- **Reduce Motion:** see P11. HIG also warns that fast-moving or blinking animation can cause dizziness and, in severe cases, seizures.
+- **Minimize time-boxed elements:** views that dismiss themselves are a problem for people who need more time and for assistive technology users.
+  Don't put important information or the only path to an action in a self-dismissing HUD or toast; keep it longer or make it dismissible under VoiceOver.
+- Common interactions use **the simplest gesture**, with an on-screen alternative. Pair sound cues with haptics and visuals.

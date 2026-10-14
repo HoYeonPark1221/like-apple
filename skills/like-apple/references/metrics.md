@@ -1,17 +1,17 @@
-# 치수 — Apple식 글자 크기 · 컨트롤(베젤) · 여백 · 모서리
+# Sizes — type, controls (bezels), spacing and corners
 
-움직임이 Apple다워도 **크기가 Apple 규격에서 벗어나 있으면 애플스럽지 않다.** 글자·컨트롤·여백·모서리의 규격을 한 곳에 모았다.
-코드는 [recipes.md §22–23](recipes.md) (`AppleMetrics`, `.appleHitTarget()`, `ConcentricCardExample`). 플랫폼별 배치·컴포넌트 규칙은 [platforms.md](platforms.md), 숫자 요약은 §6.
+Motion can be perfectly Apple-like and still feel off if **sizes drift from Apple's specs.** This collects the specs for type, controls, spacing and corners.
+Code: recipes §22–23 (`AppleMetrics`, `.appleHitTarget()`, `ConcentricCardExample`).
 
-근거 표기: **[HIG]** Apple Human Interface Guidelines 본문 · **[SDK]** 이 맥/시뮬레이터의 SDK에서 직접 측정 · **[앱]** Live Peninsula 코드에서 확인.
+Grades: **[HIG]** Apple Human Interface Guidelines text · **[SDK]** measured directly on the SDK.
 
-## 1. 글자 크기
+## 1. Type
 
-### 의미 있는 텍스트 스타일 (기본 콘텐츠 크기)
+### Semantic text styles (default content size)
 
-크기(pt)는 HIG 표와 **SDK 측정값이 22개 모두 일치**했다 [HIG][SDK]. 줄 간격(leading)은 HIG 값이다 — SDK로 따로 확인하지 않았다.
+All 22 point sizes match between the HIG table and **SDK measurements** [HIG][SDK]. Leading values are from the HIG and weren't checked separately on the SDK.
 
-| 스타일 | iOS · iPadOS 크기 / 줄 간격 | macOS 크기 / 줄 간격 | 기본 굵기 → 강조 굵기 |
+| Style | iOS · iPadOS size / leading | macOS size / leading | Default weight → emphasized |
 | --- | --- | --- | --- |
 | Large Title | 34 / 41 | 26 / 32 | Regular → Bold |
 | Title 1 | 28 / 34 | 22 / 26 | Regular → Bold |
@@ -20,105 +20,65 @@
 | Headline | 17 / 22 (Semibold) | 13 / 16 (Bold) | iOS Semibold → Semibold · macOS Bold → Heavy |
 | Body | 17 / 22 | 13 / 16 | Regular → Semibold |
 | Callout | 16 / 21 | 12 / 15 | Regular → Semibold |
-| Subhead(line) | 15 / 20 | 11 / 14 | Regular → Semibold |
+| Subheadline | 15 / 20 | 11 / 14 | Regular → Semibold |
 | Footnote | 13 / 18 | 10 / 13 | Regular → Semibold |
 | Caption 1 | 12 / 16 | 10 / 13 | Regular → iOS Semibold · macOS Medium |
 | Caption 2 | 11 / 13 | 10 / 13 (Medium) | Regular → Semibold |
 
-즉 **iOS와 macOS는 같은 이름이라도 크기가 다르다**(body 17 vs 13). 그래서 `.font(.body)` 같은 스타일을 쓰면 플랫폼마다 맞는 크기가 나오고,
-`.system(size: 17)`을 박으면 Mac에서 너무 커진다. 사용자가 글자 크기를 바꾸면(Dynamic Type) 스타일은 따라서 커지고, 박은 크기는 안 커진다.
+**The same style name has different sizes on iOS and macOS** (body 17 vs 13). Semantic styles like `.font(.body)` give each platform the right size;
+hard-coding `.system(size: 17)` is too large on the Mac. Styles also grow with Dynamic Type; hard-coded sizes don't.
 
-### 기본·최소 글자 크기 [HIG]
+### Default and minimum text size [HIG]
 
-| 플랫폼 | 기본 | 최소 |
+| Platform | Default | Minimum |
 | --- | --- | --- |
 | iOS · iPadOS | 17pt | 11pt |
 | macOS | 13pt | 10pt |
 
-### 굵기·줄 간격·자간
+### Weight, leading, tracking
 
-- **굵기 [HIG]:** Ultralight·Thin·Light는 피하고 Regular·Medium·Semibold·Bold를 쓴다. 강조는 굵기로(크기를 늘리는 것보다 자리를 덜 먹는다).
-- **줄 간격 [HIG]:** 넓은 단·긴 글은 느슨하게, 좁은 곳은 촘촘하게(다만 세 줄 이상에는 촘촘하게 쓰지 않는다). 큰 글자일수록 줄 간격 비율이 작아진다.
-  위계는 크기 하나가 아니라 **굵기 + 크기 + 줄 간격의 묶음**으로 만든다.
-- **자간(tracking):** 웹에서는 크기마다 자간을 직접 바꾸지만(큰 글자는 좁게, 작은 글자는 약간 넓게), Apple 플랫폼의 **시스템 폰트는 실행 중에 모든 크기에서 자간을 자동으로 조정한다** [HIG]. 그러므로 시스템 폰트에는 `.tracking()`을 기본으로 걸지 않는다 —
-  이미 들어 있는 보정 위에 겹쳐 건다. 시스템 폰트가 아닌 글꼴이나, 근거 있는 의도적 미세 조정에만 쓴다.
-- **시스템 폰트를 기본으로** [HIG]: 광학 크기 조정·자간 표·가독성 보정이 이미 들어 있다.
-- **Dynamic Type [HIG]:** 사용자가 글자를 **최소 200%까지** 키울 수 있게 한다. 글자에 묶인 치수(아이콘 폭 등)는 `@ScaledMetric`로 같이 키운다.
-- **대비 [HIG]:** 17pt 이하 글자는 4.5:1, 18pt 글자나 굵은 글자는 3:1 (WCAG AA).
-- **반투명 위의 글자 [앱]:** 평평한 회색 대신 대비를 높이고 굵기를 한 단계 올린다. 이 앱은 "흐릿한 회색은 글래스 위에서 사라지므로 밝기를 낮추는 대신 굵기로 물러나게" 한다.
-  반투명 위에서는 색을 투명한 앞면이 아니라 불투명한 층에 둔다.
-- **큰 면은 더 진하게:** 면적이 큰 HUD·시트는 작은 칩보다 그림자·재질을 진하게 준다.
+- **Weight [HIG]:** avoid Ultralight, Thin and Light; use Regular, Medium, Semibold, Bold. Emphasize with weight (it costs less space than size).
+- **Leading [HIG]:** looser for wide columns and long text, tighter in tight spaces (but not for three or more lines). Larger text gets proportionally tighter leading.
+  Build hierarchy from **weight + size + leading together**, not size alone.
+- **Tracking:** Apple's **system font adjusts tracking automatically at every size** [HIG]. Don't add `.tracking()` to the system font by default —
+  it stacks on top of the built-in correction. Use it only for non-system fonts or a deliberate, justified adjustment.
+- **System font by default** [HIG]: optical sizing, tracking tables and legibility tuning are built in.
+- **Dynamic Type [HIG]:** let people enlarge text to **at least 200%**. Scale text-bound dimensions (icon widths etc.) with `@ScaledMetric`.
+- **Contrast [HIG]:** 4.5:1 for text up to 17pt, 3:1 for 18pt or bold (WCAG AA).
+- **Text on translucent materials:** raise contrast and step the weight up instead of using faint gray — faint gray disappears on glass. Recede with weight, not lightness.
+  Put color on an opaque layer, not on the translucent face.
+- **Larger surfaces get heavier treatment:** a large HUD or sheet gets a stronger shadow and material than a small chip.
 
-## 2. 컨트롤과 베젤 [HIG Accessibility]
+## 2. Controls and bezels [HIG Accessibility]
 
-"베젤"은 컨트롤의 **눈에 보이는 배경·테두리**를 말한다. Apple은 컨트롤 크기와 그 주변 여백을 이렇게 둔다.
+A "bezel" is a control's **visible background or border**. Apple's control sizes and the space around them:
 
-| 플랫폼 | 기본 컨트롤 크기 | 최소 컨트롤 크기 |
+| Platform | Default control size | Minimum control size |
 | --- | --- | --- |
 | iOS · iPadOS | **44 × 44pt** | 28 × 28pt |
 | macOS | **28 × 28pt** | 20 × 20pt |
 
-- **주변 여백:** 베젤이 있는 컨트롤은 요소 주위로 **약 12pt**, 베젤이 없는 컨트롤(글자·아이콘만)은 눈에 보이는 가장자리에서 **약 24pt** 비운다.
-- 눈에 보이는 아이콘이 작아도 **누르는 영역은 규격을 채운다** — `.appleHitTarget()`. 시각 크기를 키우는 것과 터치 영역을 키우는 것은 별개다.
+- **Spacing:** about **12pt** around controls with a bezel; about **24pt** from the visible edge of bezel-less controls (text or icon only).
+- Even when the visible icon is small, **the hit area meets the spec** — `.appleHitTarget()`. Growing the visual and growing the hit area are separate things.
+- **iPad pointer:** make the hit areas of bar buttons **contiguous** — a gap makes the pointer flicker back to its default shape between them [HIG Pointing devices].
 
-## 3. 모서리 · 동심원 · 안전 영역
+## 3. Corners, concentricity, safe areas
 
-- **연속 곡률:** 둥근 모서리는 `RoundedRectangle(cornerRadius:style: .continuous)` — 원호가 아니라 Apple 표준의 부드러운 모서리다. 이 스킬의 모든 레시피가 그렇게 쓴다.
-- **동심 모서리:** 중첩된 둥근 도형은 안쪽 반경 = **바깥 반경 − 여백**. 반경이 같으면 모서리에서 간격이 벌어져 어긋나 보인다.
-  이 앱의 `NotchCardMetrics`가 같은 규칙이다 — 카드 반경 36은 노치 아래 모서리와 동심이 되도록 잡은 값이고, 벽과의 간격이 `노치 모서리 − 카드 반경`으로 정해진다 [앱].
-  iOS 26 / macOS 26의 `ConcentricRectangle`은 `containerShape`를 읽어 안쪽 반경을 알아서 계산한다 [SDK 컴파일 확인] (recipes §23).
-- **화면(기기) 모서리 반경:** 공개된 숫자 API가 없다. 하드코딩하지 말고 `ContainerRelativeShape` / `ConcentricRectangle`에 맡긴다.
-- **안전 영역·노치 [HIG Layout]:** 안전 영역은 하드웨어(Dynamic Island 포함)와 시스템 UI가 가리지 않는 영역이다. macOS에서는 **창 맨 아래에 중요한 컨트롤을 두지 않고**
-  (사용자가 창을 화면 아래로 걸치게 둔다), **카메라 하우징(노치) 뒤 위쪽 가장자리에 내용을 두지 않는다.**
-  노치·Island의 크기는 숫자로 박지 말고 런타임에 읽는다 — 이 앱은 `NSScreen.auxiliaryTopLeftArea`/`RightArea`와 `safeAreaInsets`로 읽는다 [앱, `Size.swift`].
+- **Continuous curvature:** rounded corners use `RoundedRectangle(cornerRadius:style: .continuous)` — Apple's smooth corner, not a circular arc. Every recipe here does.
+- **Concentric corners:** for nested rounded shapes, inner radius = **outer radius − inset**. Equal radii open a wider gap at the corners and look misaligned.
+  On iOS 26 / macOS 26, `ConcentricRectangle` reads the `containerShape` and computes the inner radius for you [SDK compile-checked] (recipes §23).
+  Standard toolbar buttons, fields and headers are already concentric with the bar's corners; make custom ones concentric too [HIG Toolbars].
+- **Screen (device) corner radius:** no public numeric API. Don't hard-code it; use `ContainerRelativeShape` / `ConcentricRectangle`.
+- **Safe areas and the notch [HIG Layout]:** the safe area is what hardware (including the Dynamic Island) and system UI don't cover. Read notch and Island sizes at runtime instead of hard-coding them —
+  on the Mac, `NSScreen.auxiliaryTopLeftArea` / `auxiliaryTopRightArea` and `safeAreaInsets`.
+- **Clear Liquid Glass** over bright content gets a **35% black dimming layer** [HIG Materials].
 
-## 4. 이 앱의 현재 크기 감사 (2026-10-11, 휴리스틱)
+## 4. Order for deciding sizes
 
-`.font(.system(size:))` 리터럴을 세어(주석 제외) macOS Apple 스타일 크기와 비교했다. 주석 처리된 코드를 뺀 리터럴은 73곳이고, 스타일 이름(`.caption` 등) 사용은 32곳(그중 `.caption`이 24곳)이다.
-
-| 발견 | 내용 |
-| --- | --- |
-| Apple 스타일 크기와 일치 | 10 · 11 · 12 · 13 · 15 · 17 · 22 — 이것들은 그대로 둔다 |
-| **14pt가 가장 많다**(10곳) | macOS 스타일 크기가 아니다(13 body와 15 title3 사이). 13 또는 15로 맞출 후보 |
-| **반쪽 크기** 10.5 · 11.5 · 12.5 · 8.5 · 9.5 (14곳, 8.5·9.5는 아래 항목과 겹침) | 어떤 스타일에도 없다. 정수 스타일 크기로 맞출 후보 |
-| **10pt 미만**(8 · 8.5 · 9 · 9.5) 14곳 | 글자로 보이는 곳 약 9곳, 아이콘 크기 5곳. HIG 최소(macOS 10pt)는 글자에만 적용된다. 날씨·큐·캘린더·트레이의 보조 글자. 읽혀야 하는 글자라면 올릴 후보 |
-| 굵기 | semibold 28 · medium 23 · bold 11 — Apple이 권하는 범위 안 |
-
-> 이 감사는 정규식 휴리스틱이라 "글자인지 아이콘인지"를 정확히 가르지 못한다(바로 위 몇 줄에서 `Text(`와 `Image(`를 찾음). 노치처럼 높이가 정해진 크롬에서는
-> 작은 글자가 불가피할 수 있다 — **고치라는 뜻이 아니라 Apple 규격과의 거리를 보여주는 표**다. 바꾸기 전에 화면에서 읽히는지 본다.
-
-## 5. 크기를 정하는 순서
-
-1. **의미 있는 스타일부터.** `.font(.body)` `.headline` `.footnote` — 플랫폼 크기와 Dynamic Type가 따라온다.
-2. 고정 크기가 꼭 필요한 곳(노치, HUD처럼 높이가 정해진 크롬)이면 **Apple 스타일 크기 중 가장 가까운 정수**로 맞춘다(macOS: 10·11·12·13·15·17·22·26). 반쪽 pt는 피한다.
-3. **글자에는 최소 크기 이하를 쓰지 않는다**(iOS 11 / macOS 10pt). 아이콘 크기에는 이 기준이 적용되지 않는다.
-4. 아이콘만 있는 컨트롤은 `.appleHitTarget()`으로 터치 영역을 채운다. 베젤 유무에 맞춰 주변 여백(12 / 24pt)을 둔다.
-5. 중첩된 둥근 도형은 반경을 `바깥 − 여백`으로(동심). 기기 모서리는 `ContainerRelativeShape`/`ConcentricRectangle`.
-6. 반투명 위의 글자는 굵기·대비를 올리고, 대비를 4.5:1(작은 글자)로 확인한다.
-7. 크기도 **Reduce Motion·Dynamic Type 큰 글자**에서 한 번 본다 — 레이아웃이 깨지는 곳이 대개 하드코딩된 크기다.
-
-## 6. 플랫폼별 치수·배치 [HIG]
-
-숫자가 정해진 것만 모았다. 이유와 나머지 규칙은 [platforms.md](platforms.md).
-
-| 항목 | iOS | iPadOS | macOS | 출처 |
-| --- | --- | --- | --- | --- |
-| 기본 / 최소 컨트롤 | 44 / 28pt | 44 / 28pt | 28 / 20pt | Accessibility |
-| 컨트롤 주변 여백 | 베젤 있음 ~12pt · 없음 ~24pt | 같음 (포인터 터치 영역도 같은 값) | 같음 | Accessibility · Pointing devices |
-| 바 버튼 터치 영역 | — | **틈 없이 이어 붙임**(포인터 깜빡임 방지) | — | Pointing devices |
-| 이미지 버튼 안쪽 여백 | — | — | 그림 가장자리 ↔ 버튼 가장자리 ~10px | Buttons |
-| 분할 뷰 구분선 | — | — | 얇은 스타일 1pt | Split views |
-| 툴바 묶음 수 | 최대 3 | 최대 3 | 최대 3 | Toolbars |
-| 툴바·창 제목 | 15자 미만 | 15자 미만 | 15자 미만, 앱 이름 금지 | Toolbars |
-| prominent 동작 | 하나, trailing | 하나, trailing | 하나, trailing | Toolbars |
-| clear 유리 위 딤 | 밝은 바탕이면 검정 35% | 같음 | 같음 | Materials |
-| 글자 확대 지원 | 최소 200% | 최소 200% | 최소 200% | Accessibility |
-| 대비 | 17pt 이하 4.5:1 · 18pt 이상/굵게 3:1 | 같음 | 같음 | Accessibility |
-| 앱 아이콘 | 1024px 정사각형 레이어, 시스템이 둥근 모서리로 마스킹 | 같음 | 같음 | App icons |
-
-배치 규칙:
-- **macOS 창 맨 아래에 중요한 컨트롤·정보를 두지 않는다**(창을 화면 밖으로 걸친다). 하단 막대는 작은 상태 정보만(Finder 상태 막대처럼).
-- macOS: 스위치·체크박스·라디오는 창 본문에, 툴바·상태 막대에는 두지 않는다. 라디오는 ~5개를 넘으면 팝업 버튼으로.
-- iOS: 스위치는 **목록 행 안에서만**. 손이 닿는 아래·가운데에 자주 쓰는 컨트롤.
-- iPhone(compact)에서는 팝오버·분할 뷰를 쓰지 않는다 — 시트·전체 화면으로.
-- 앱 아이콘은 **모서리를 직접 둥글리지 않는다**(정사각형으로 주면 시스템이 마스킹). 하이라이트·그림자·블러도 시스템이 그린다.
+1. **Start from semantic styles.** `.font(.body)` `.headline` `.footnote` — platform sizes and Dynamic Type come with them.
+2. Where a fixed size is unavoidable (fixed-height chrome like a notch or HUD), snap to **the nearest whole Apple style size** (macOS: 10 · 11 · 12 · 13 · 15 · 17 · 22 · 26). Avoid half points.
+3. **Never go below the minimum for text** (iOS 11 / macOS 10pt). This doesn't apply to icon sizes.
+4. Icon-only controls fill their hit area with `.appleHitTarget()`. Leave 12 / 24pt around them depending on whether they have a bezel.
+5. Nested rounded shapes use `outer − inset` (concentric). Device corners use `ContainerRelativeShape` / `ConcentricRectangle`.
+6. Text on translucent surfaces gets more weight and contrast; check 4.5:1 for small text.
+7. Check sizes at **large Dynamic Type and with Reduce Motion** too — layouts usually break where sizes are hard-coded.

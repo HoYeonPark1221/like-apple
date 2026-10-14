@@ -1,25 +1,24 @@
 //
 //  AppleMotion.swift
 //
-//  Apple식 애니메이션 도구 모음 (iOS 17 / iPadOS 17 / macOS 14 이상).
-//  macOS 노치 앱 Live Peninsula를 개발하며 다듬은 모션·크기 규칙을 일반화한 것이다.
-//  이 파일은 like-apple 스킬의 references/recipes.md 에서 자동 생성된다 — 고칠 때는 레시피를 고치고 다시 만든다.
+//  Apple-style motion toolkit (iOS 17 / iPadOS 17 / macOS 14 and later).
+//  Generated from the like-apple skill's references/recipes.md — edit the recipes, then regenerate.
 //
-//  검사용 묶음이다 — 사용자 프로젝트에는 필요한 레시피만 옮겨 쓴다. 들어 있는 것:
-//    Motion            모션 어휘 (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
-//    .motion(_:value:) 동작 줄이기를 자동으로 따르는 .animation
-//    PressableStyle    누르는 순간 반응하는 버튼
-//    Materialize       재질이 도착하는 등장
-//    .contentDrop      들어올 때와 나갈 때가 다른 전환
-//    EmergeFromSource  끊어도 이어지는 등장 (genie)
+//  A verification bundle: bring only the recipes you need into a project. Contents:
+//    Motion            motion vocabulary (settle / present / morph / lift / pressDown / pressRelease / exit / swap / reduced)
+//    .motion(_:value:) .animation that follows Reduce Motion automatically
+//    PressableStyle    a button that reacts the instant it's pressed
+//    Materialize       a material that arrives
+//    .contentDrop      different entrance and exit
+//    EmergeFromSource  an interruptible entrance (genie)
 //    SegmentMeter · CountdownRing · DecayingShake · TransitionsExample
-//    Physics · VelocityTracker · PresentedOffset · SnapDragExample   손의 속도를 이어받는 드래그
+//    Physics · VelocityTracker · PresentedOffset · SnapDragExample   a drag that carries the hand's velocity
 //    PagedDeck · Haptics · GlassMorphMenu · SymbolEffectsTour · Pop · IslandMorph
 //    CometStroke · RotatingGlowBorder · LivingMesh · ZoomTransitionExample
-//    AppleMetrics · .appleHitTarget() · ConcentricCardExample   컨트롤·베젤 규격, 최소 터치 영역, 동심 모서리
-//    .applePointerEffect · Haptics.play(meaning:) · SystemSheetExample · AdaptiveRow · GlassLayeringExample · .rejectShake   플랫폼 HIG
+//    AppleMetrics · .appleHitTarget() · ConcentricCardExample   control/bezel specs, minimum hit area, concentric corners
+//    .applePointerEffect · Haptics.play(meaning:) · SystemSheetExample · AdaptiveRow · GlassLayeringExample · .rejectShake   platform behavior
 //
-//  이름이 이미 쓰이고 있으면(예: Motion, Haptics) 프로젝트에 맞게 접두어를 붙여 바꾼다.
+//  If a name is already taken in your project (e.g. Motion, Haptics), rename it with a prefix.
 //
 
 import SwiftUI
@@ -30,32 +29,32 @@ import UIKit
 #endif
 
 enum Motion {
-    /// 상태가 바뀌었다는 사실 자체(토글, 면이 나타남/사라짐, 호버, 드롭 상태).
-    /// Apple `.smooth` — bounce 0. 사실은 튀지 않아야 하므로 되튐 없는 임계 감쇠가 기본이다.
+    /// The fact that state changed (toggles, surfaces appearing/disappearing, hover, drop state).
+    /// Apple `.smooth` — bounce 0. A fact shouldn't bounce, so critical damping is the default.
     static let settle = Animation.smooth(duration: 0.30)
 
-    /// 관성 없는 입력(키, 탭)으로 뜨는 HUD·카드. 관성이 없는 동작에 오버슈트를 주면 과장돼 보인다.
+    /// HUDs and cards raised by inertia-free input (keys, taps). Overshoot on motion without momentum looks exaggerated.
     static let present = Animation.smooth(duration: 0.38)
 
-    /// 사용자가 직접 일으킨 모양 변화(펼침, 크기, 모서리). Apple `.snappy` — bounce 0.15(감쇠비 0.85).
-    /// 오버슈트가 1% 아래라 튕김은 없고 감속감만 남는다.
+    /// Shape changes the user caused (expanding, resizing, corners). Apple `.snappy` — bounce 0.15 (damping 0.85).
+    /// Overshoot stays under 1%, so there's deceleration without bounce.
     static let morph = Animation.snappy(duration: 0.42)
 
-    /// 끌고 온 운동량이 남아 있는 움직임(파일을 들고 대상 위에 도착, 던진 뒤). Apple `.bouncy`(0.30)보다 살짝 조용한 0.28.
+    /// Motion with leftover momentum from a drag (a file landing on a target, after a fling). Slightly calmer than `.bouncy` (0.30): 0.28.
     static let lift = Animation.spring(duration: 0.35, bounce: 0.28)
 
-    /// 누르는 건 사용자가 방금 한 일이라 기다릴 이유가 없다 — 거의 즉시.
+    /// Pressing is what the user just did — no reason to wait. Nearly instant.
     static let pressDown = Animation.easeOut(duration: 0.07)
-    /// 놓은 뒤의 일은 물체처럼 돌아간다.
+    /// What happens after release returns like an object.
     static let pressRelease = Animation.smooth(duration: 0.26)
 
-    /// 나갈 때는 들어올 때보다 빠르게. 미련이 남지 않고, 컨테이너가 접히기 전에 내용이 먼저 비워진다.
+    /// Leave faster than you arrive. Nothing lingers, and content clears before the container folds.
     static let exit = Animation.easeIn(duration: 0.13)
 
-    /// 텍스트·이미지 교체. 움직이지 않고 밝기만 바뀐다.
+    /// Text and image replacement. No movement, only brightness.
     static let swap = Animation.easeInOut(duration: 0.28)
 
-    /// 동작 줄이기 대체. 움직임은 빼고 "값이 바뀌었다"는 정보만 남긴다.
+    /// Reduce Motion replacement. Drop the movement; keep only "the value changed".
     static let reduced = Animation.easeOut(duration: 0.2)
 }
 
@@ -82,7 +81,7 @@ struct PressableStyle: ButtonStyle {
         StyleBody(configuration: configuration, pressedScale: pressedScale)
     }
 
-    // 이름을 Body로 하면 ButtonStyle의 연관 타입 Body와 부딪혀 컴파일이 안 된다.
+    // Naming this `Body` collides with ButtonStyle's associated type and fails to compile.
     private struct StyleBody: View {
         let configuration: ButtonStyleConfiguration
         let pressedScale: CGFloat
@@ -118,8 +117,8 @@ struct Materialize: ViewModifier {
             .scaleEffect(settled ? 1 : scale, anchor: anchor)
             .offset(y: settled ? 0 : offsetY)
             .opacity(isPresented ? 1 : 0)
-            // 들어올 때와 나갈 때 곡선이 달라야 한다(P2). 같은 곡선을 쓰면 나갈 때도 0.3초 동안 흐려지며 번져서
-            // "안개가 걷히는" 것처럼 보인다 — 실제 시뮬레이터 녹화에서 확인한 결함이다.
+            // Entrance and exit need different curves (P2). With the same curve the exit also blurs and smears for 0.3s
+            // and looks like fog lifting — a defect seen in an actual simulator recording.
             .animation(reduceMotion ? Motion.reduced : (isPresented ? Motion.present : Motion.exit), value: isPresented)
     }
 }
@@ -136,9 +135,9 @@ extension AnyTransition {
 }
 
 struct EmergeFromSource: ViewModifier, Animatable {
-    var progress: Double          // 0 = 출발한 자리에 말려 있음, 1 = 다 나옴
-    let anchor: UnitPoint         // 빨려드는 지점
-    let startScale: Double        // 출발 크기 비율(썸네일 / 완성 크기)
+    var progress: Double          // 0 = curled up at the origin, 1 = fully out
+    let anchor: UnitPoint         // the point it's sucked into
+    let startScale: Double        // starting scale ratio (thumbnail / final size)
 
     nonisolated var animatableData: Double {
         get { progress }
@@ -152,14 +151,14 @@ struct EmergeFromSource: ViewModifier, Animatable {
                 y: startScale + (1 - startScale) * pow(progress, 0.6),
                 anchor: anchor
             )
-            // 초반에만, 얕게. 큰 이미지를 매 프레임 블러하는 비용이라 반경이 곧 프레임 드랍이다.
+            // Early and shallow only. Blurring a large image every frame costs frames, so radius is frame drops.
             .blur(radius: progress < 0.5 ? (0.5 - progress) * 6 : 0)
-            // 끝까지 반투명하면 유령처럼 보이므로 초반에 빨리 불투명해진다.
+            // Translucent until the end looks ghostly, so it turns opaque early.
             .opacity(min(1, progress * 2.2))
     }
 }
 
-// 사용: 상태로 구동하고, 스프링 하나를 바깥에서 건다.
+// Usage: drive it by state and apply one spring outside.
 // art.modifier(EmergeFromSource(progress: isOpen ? 1 : 0, anchor: .bottomLeading, startScale: 0.3))
 //    .motion(Motion.morph, value: isOpen)
 
@@ -177,7 +176,7 @@ struct SegmentMeter: View, Animatable {
             let gap: CGFloat = 3
             let width = (size.width - gap * CGFloat(count - 1)) / CGFloat(count)
             for index in 0..<count {
-                // level이 조각 한 개 몫(1/count)을 지날 때마다 그 조각이 0에서 1로 켜진다.
+                // Each time level passes one segment's share (1/count), that segment goes from 0 to 1.
                 let lit = min(max(level * Double(count) - Double(index), 0), 1)
                 let rect = CGRect(x: CGFloat(index) * (width + gap), y: 0, width: width, height: size.height)
                 context.fill(
@@ -192,7 +191,7 @@ struct SegmentMeter: View, Animatable {
 // SegmentMeter(level: volume).motion(Motion.settle, value: volume)
 
 struct CountdownRing: View {
-    let elapsed: Double           // 지나간 몫 0...1
+    let elapsed: Double           // elapsed fraction 0...1
     let isRunning: Bool
     var tint: Color = .orange
     var lineWidth: CGFloat = 3
@@ -203,9 +202,9 @@ struct CountdownRing: View {
             Circle()
                 .trim(from: min(max(elapsed, 0), 1), to: 1)
                 .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                .rotationEffect(.degrees(-90))      // 12시가 기준선이다. 시계가 그러니까.
+                .rotationEffect(.degrees(-90))      // 12 o'clock is the baseline, like a clock.
         }
-        .padding(lineWidth / 2)                       // 선은 경로 양쪽으로 번지므로 절반 들여 잉크를 상자 끝에 맞춘다
+        .padding(lineWidth / 2)                       // a stroke spreads to both sides of the path; inset by half so the ink meets the box edge
         .animation(isRunning ? .linear(duration: 1) : .easeOut(duration: 0.25), value: elapsed)
         .accessibilityElement()
         .accessibilityLabel("Time remaining")
@@ -240,7 +239,7 @@ struct DecayingShake: View {
     }
 
     private func ringOnce() async {
-        // 동작 줄이기: 회전 대신 크기만 숨 쉰다. 알림을 없애는 게 아니라 어지럽지 않게 바꾼다.
+        // Reduce Motion: breathe in size instead of rotating. Don't remove the alert — make it not dizzying.
         guard !reduceMotion else {
             withAnimation(.easeInOut(duration: 0.4)) { scale = 1.1 }
             try? await Task.sleep(nanoseconds: 400_000_000)
@@ -249,7 +248,7 @@ struct DecayingShake: View {
             return
         }
 
-        // 맞는 순간 살짝 부푼다. 흔들림보다 먼저 끝나야 '맞았다'와 '흔들린다'가 겹치지 않는다.
+        // A slight swell at the strike. It must finish before the swing so "struck" and "swinging" don't overlap.
         withAnimation(.spring(response: 0.18, dampingFraction: 0.5)) { scale = 1.18 }
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 220_000_000)
@@ -265,7 +264,7 @@ struct DecayingShake: View {
 }
 
 extension ContentTransition {
-    /// 가능하면 iOS 18 / macOS 15의 magic replace, 아니면 일반 replace.
+    /// Magic replace on iOS 18 / macOS 15 when available, plain replace otherwise.
     static var symbolReplace: ContentTransition {
         if #available(iOS 18, macOS 15, *) {
             .symbolEffect(.replace.magic(fallback: .replace))
@@ -300,18 +299,18 @@ struct TransitionsExample: View {
 }
 
 enum Physics {
-    /// 지금 속도로 계속 미끄러지면 어디서 멈추는지(스크롤 감속과 같은 지수 감쇠).
+    /// Where it would stop if it kept sliding at this velocity (the same exponential decay as scroll deceleration).
     static func project(velocity: Double, deceleration: Double = 0.99) -> Double {
         velocity / 1000 * deceleration / (1 - deceleration)
     }
 
-    /// 넘친 만큼에 비례하되 갈수록 덜 따라오는 곡선. 점근선이 dimension × constant.
+    /// Proportional to the overshoot but following less and less. The asymptote is dimension × constant.
     static func rubberBand(_ overshoot: Double, dimension: Double, constant: Double = 0.55) -> Double {
         guard overshoot > 0 else { return 0 }
         return (overshoot * dimension * constant) / (dimension + constant * overshoot)
     }
 
-    /// 응답(초)·감쇠비 두 값으로 만드는 스프링. 시작 속도를 넘길 수 있는 건 이쪽뿐이다.
+    /// A spring from response (s) and damping ratio. This is the only form that accepts an initial velocity.
     static func spring(response: Double, damping: Double, velocity: Double) -> Animation {
         let stiffness = pow(2 * Double.pi / response, 2)
         return .interpolatingSpring(
@@ -323,7 +322,7 @@ enum Physics {
     }
 }
 
-/// 놓는 순간 기준으로 직전 0.1초의 손끝 속도(pt/초)를 구한다. 그보다 오래된 움직임은 이미 멈춘 손의 것이다.
+/// Finger velocity (pt/s) over the last 0.1s before release. Older movement belongs to a hand that already stopped.
 final class VelocityTracker {
     private var samples: [(time: TimeInterval, x: Double)] = []
 
@@ -341,13 +340,13 @@ final class VelocityTracker {
     }
 }
 
-/// 화면에 실제로 그려지는 값. `@State`에는 목표값만 있으므로, 스프링이 도는 동안의 위치는 여기서 읽는다.
-/// 상태가 아니라 참조라서 매 프레임 써도 뷰를 다시 그리게 하지 않는다.
+/// The value actually drawn on screen. `@State` only holds the target, so read the in-flight position here.
+/// It's a reference, not state, so writing it every frame doesn't trigger a redraw.
 final class PresentedValue {
     var value: Double = 0
 }
 
-/// 가로 위치를 그리면서, 애니메이션 중 매 프레임의 값을 `PresentedValue`에 적어 둔다.
+/// Draws a horizontal offset and records each animated frame's value into `PresentedValue`.
 struct PresentedOffset: ViewModifier, Animatable {
     var x: Double
     let presented: PresentedValue
@@ -363,7 +362,7 @@ struct PresentedOffset: ViewModifier, Animatable {
     }
 }
 
-/// 가로로 끌어 몇 개의 자리 중 하나에 내려앉는 카드.
+/// A card dragged horizontally that settles into one of several slots.
 struct SnapDragExample: View {
     let snapPoints: [Double] = [0, 120, 240]
     @State private var x: Double = 0
@@ -383,13 +382,13 @@ struct SnapDragExample: View {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
                 if origin == nil {
-                    // 잡는 순간 화면에 보이던 값. 목표값(x)에서 출발하면 스프링이 한창일 때 순간이동한다.
+                    // The value visible at the moment of grab. Starting from the target (x) teleports it mid-spring.
                     origin = presented.value
                     tracker.reset()
                 }
                 tracker.record(x: Double(value.translation.width))
                 let raw = (origin ?? x) + Double(value.translation.width)
-                // 애니메이션 없이 1:1. 도는 중이던 스프링은 여기서 멈추고, 보이던 자리에서 이어서 끈다.
+                // 1:1 with no animation. A running spring stops here and the drag continues from where it was visible.
                 withTransaction(Transaction(animation: nil)) { x = resisted(raw) }
             }
             .onEnded { _ in
@@ -420,14 +419,14 @@ struct PageDepth: ViewModifier {
     let reduceMotion: Bool
     let pageWidth: CGFloat
 
-    /// 스크롤이 만든 이동 중 화면에 남기는 비율. 1에 가까울수록 손가락에 더 붙는다.
+    /// How much of the scroll movement stays on screen. Closer to 1 sticks closer to the finger.
     private static let travel: CGFloat = 0.55
-    /// 이 거리(페이지 폭 대비)에서 완전히 사라진다.
+    /// Fully gone at this distance (relative to page width).
     private static let fadeDistance: CGFloat = 0.46
     private static let maxBlur: CGFloat = 7
 
     func body(content: Content) -> some View {
-        // scrollTransition 클로저는 Sendable이라 MainActor 정적 상수를 직접 못 읽는다. 지역 값으로 먼저 꺼낸다.
+        // The scrollTransition closure is Sendable and can't read MainActor statics directly; copy them to locals first.
         let fadeDistance = Self.fadeDistance
         let travelRatio = reduceMotion ? 0 : Self.travel
         let maxBlur = reduceMotion ? 0 : Self.maxBlur
@@ -437,7 +436,7 @@ struct PageDepth: ViewModifier {
         return content.scrollTransition(.interactive, axis: .horizontal) { view, phase in
             let distance = min(abs(phase.value), 1)
             let t = min(distance / fadeDistance, 1)
-            // ease-out: 초반에 빨리 옅어지고 막판엔 완만. 같은 거리에서 선형보다 항상 더 흐리다.
+            // ease-out: fades fast early and gently at the end — always fainter than linear at the same distance.
             let fade = 1 - (1 - t) * (1 - t)
             let blur = maxBlur * fade
 
@@ -465,8 +464,8 @@ struct PagedDeck<Item: Identifiable, Content: View>: View where Item.ID: Hashabl
                         content(item)
                             .frame(width: geo.size.width, height: geo.size.height)
                             .modifier(PageDepth(reduceMotion: reduceMotion, pageWidth: geo.size.width))
-                            // 이동을 상쇄해 제자리에 두면 옆 화면이 지금 화면 위에 겹쳐 서 있다.
-                            // 안 보일 뿐 눌리기는 하므로 보고 있는 화면만 클릭을 받게 한다.
+                            // Offsetting the travel leaves neighbor pages standing on top of the current one.
+                            // They're invisible but still clickable, so only the page being viewed accepts hits.
                             .allowsHitTesting(selection == nil || selection == item.id)
                             .id(item.id)
                     }
@@ -475,7 +474,7 @@ struct PagedDeck<Item: Identifiable, Content: View>: View where Item.ID: Hashabl
             }
             .scrollTargetBehavior(.paging)
             .scrollPosition(id: $selection)
-            // 스크롤 뷰가 제 테두리에서 내용을 자르면 남는 이동분이 좌우 끝에서 싹둑 잘린다.
+            // If the scroll view clips content to its bounds, the leftover travel gets chopped at the edges.
             .scrollClipDisabled()
             .scrollIndicators(.hidden)
         }
@@ -559,7 +558,7 @@ struct Pop: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
-        // keyframeAnimator 클로저는 Sendable이라 환경 값을 직접 못 읽는다. 지역 값으로 먼저 꺼낸다.
+        // The keyframeAnimator closure is Sendable and can't read environment values directly; copy to a local first.
         let reduce = reduceMotion
         return content.keyframeAnimator(initialValue: 1.0, trigger: trigger) { view, scale in
             view.scaleEffect(reduce ? 1 : scale)
@@ -626,7 +625,7 @@ struct IslandMorph<Compact: View, Expanded: View>: View {
 }
 
 extension Shape {
-    /// 같은 획을 세 겹으로 쌓아 빛이 번지게 한다.
+    /// Stacks the same stroke three times so the light spreads.
     func glow(fill: some ShapeStyle, lineWidth: Double, blurRadius: Double = 8, lineCap: CGLineCap = .round) -> some View {
         self
             .stroke(style: StrokeStyle(lineWidth: lineWidth / 2, lineCap: lineCap))
@@ -645,8 +644,8 @@ extension Shape {
 }
 
 struct CometStroke<Content: Shape, Fill: ShapeStyle>: View, Animatable {
-    var progress: Double          // 0...1, 머리의 위치
-    var tail: Double = 0.35       // 꼬리 길이(경로 대비). 1이면 손글씨
+    var progress: Double          // 0...1, where the head is
+    var tail: Double = 0.35       // tail length (relative to the path). 1 = handwriting
     var fill: Fill
     var lineWidth: Double = 4
     var blurRadius: Double = 6
@@ -675,7 +674,7 @@ struct RotatingGlowBorder<S: InsettableShape>: View {
 
     var body: some View {
         GeometryReader { geo in
-            // 돌려도 모서리가 비지 않도록 대각선 길이의 정사각형을 돌린다.
+            // Rotate a square as wide as the diagonal so the corners never go empty.
             let side = hypot(geo.size.width, geo.size.height)
             AngularGradient(colors: colors, center: .center)
                 .frame(width: side, height: side)
@@ -693,8 +692,8 @@ struct RotatingGlowBorder<S: InsettableShape>: View {
     }
 }
 
-// 사용: CometStroke(progress: p, tail: 1, fill: .white, lineWidth: 6, blurRadius: 0) { MyPathShape() }
-//       .onAppear { withAnimation(.easeInOut(duration: 4)) { p = 1 } }
+// Usage: CometStroke(progress: p, tail: 1, fill: .white, lineWidth: 6, blurRadius: 0) { MyPathShape() }
+//        .onAppear { withAnimation(.easeInOut(duration: 4)) { p = 1 } }
 
 @available(iOS 18.0, macOS 15.0, *)
 struct LivingMesh: View {
@@ -755,7 +754,7 @@ struct ZoomTransitionExample: View {
 #endif
 
 enum AppleMetrics {
-    /// 컨트롤(버튼 등)의 기본·최소 크기. HIG 값이며 플랫폼마다 다르다.
+    /// Default and minimum size of a control (button etc.). HIG values; they differ per platform.
     enum HitTarget {
         #if os(macOS)
         static let `default`: CGFloat = 28
@@ -766,18 +765,18 @@ enum AppleMetrics {
         #endif
     }
 
-    /// 베젤(눈에 보이는 배경·테두리)이 있는 컨트롤 주변 여백 ≈ 12pt, 없는 컨트롤은 눈에 보이는 가장자리 기준 ≈ 24pt.
+    /// Space around a control with a bezel (visible background/border) ≈ 12pt; around a bezel-less one, from its visible edge ≈ 24pt.
     static let paddingAroundBezeled: CGFloat = 12
     static let paddingAroundBezelless: CGFloat = 24
 
-    /// 동심 모서리: 안쪽 도형의 반경 = 바깥 반경 − 둘 사이 여백. 그래야 모서리를 따라 간격이 일정하다.
+    /// Concentric corners: inner radius = outer radius − the inset between them, so the gap stays even around the corner.
     static func concentricRadius(outer: CGFloat, inset: CGFloat) -> CGFloat {
         max(outer - inset, 0)
     }
 }
 
 extension View {
-    /// 눈에 보이는 크기와 상관없이 누를 수 있는 영역을 규격 이상으로 만든다.
+    /// Makes the pressable area at least the spec size regardless of the visible size.
     func appleHitTarget(_ size: CGFloat = AppleMetrics.HitTarget.default) -> some View {
         frame(minWidth: size, minHeight: size)
             .contentShape(Rectangle())
@@ -814,7 +813,7 @@ struct ConcentricAutoExample: View {
 enum PointerEffectKind { case highlight, lift, hover }
 
 extension View {
-    /// 포인터가 올라왔을 때의 반응. iPadOS는 시스템 포인터 효과, macOS는 호버 밝기.
+    /// How it responds when the pointer arrives. System pointer effects on iPadOS, hover brightness on macOS.
     func applePointerEffect(_ kind: PointerEffectKind, cornerRadius: CGFloat = 12) -> some View {
         modifier(ApplePointerEffect(kind: kind, cornerRadius: cornerRadius))
     }
@@ -834,7 +833,7 @@ struct ApplePointerEffect: ViewModifier {
         case .lift:
             content.contentShape(.hoverEffect, shape).hoverEffect(.lift)
         case .hover:
-            // 큰 요소: 포인터 모양은 그대로, 틴트만. 크기를 키우지 않는다(이웃과 겹침).
+            // Large element: the pointer keeps its shape; tint only. Don't scale it (it would collide with neighbors).
             content
                 .background(shape.fill(.primary.opacity(isHovering ? 0.06 : 0)))
                 .onHover { hovering in withAnimation(Motion.settle) { isHovering = hovering } }
@@ -856,7 +855,7 @@ extension Haptics {
     @MainActor
     static func play(meaning: HapticMeaning) {
         #if os(macOS)
-        // macOS 햅틱은 드래그·포스 클릭 중의 신호다. 작업 결과(success 등)에는 대응 패턴이 없으므로 울리지 않는다.
+        // macOS haptics signal drags and force clicks. There's no pattern for task outcomes (success etc.), so play nothing.
         let pattern: NSHapticFeedbackManager.FeedbackPattern? = switch meaning {
         case .selection, .snap, .boundary: .alignment
         case .success, .warning, .failure: nil
@@ -881,14 +880,14 @@ struct SystemSheetExample: View {
     @State private var detent: PresentationDetent = .medium
 
     var body: some View {
-        Button("편집") { isPresented = true }
+        Button("Edit") { isPresented = true }
             .sheet(isPresented: $isPresented) {
                 NavigationStack {
-                    Form { Toggle("변경 사항 있음", isOn: $hasChanges) }
-                        .navigationTitle("편집")
+                    Form { Toggle("Has changes", isOn: $hasChanges) }
+                        .navigationTitle("Edit")
                         .toolbar {
-                            ToolbarItem(placement: .cancellationAction) { Button("취소") { isPresented = false } }
-                            ToolbarItem(placement: .confirmationAction) { Button("완료") { isPresented = false } }
+                            ToolbarItem(placement: .cancellationAction) { Button("Cancel") { isPresented = false } }
+                            ToolbarItem(placement: .confirmationAction) { Button("Done") { isPresented = false } }
                         }
                 }
                 .presentationDetents([.medium, .large], selection: $detent)
@@ -918,7 +917,7 @@ struct AdaptiveRow<Leading: View, Trailing: View>: View {
     }
 
     var body: some View {
-        // HStack/VStack을 if로 갈아 끼우지 않는다 — AnyLayout은 정체성을 유지해 자리가 흐른다.
+        // Don't swap HStack/VStack with `if` — AnyLayout keeps identity so positions flow.
         let layout = stacksVertically
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
             : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
@@ -941,8 +940,8 @@ struct GlassLayeringExample: View {
                         .frame(height: 280).clipped()
                         .backgroundExtensionEffect()
                         .overlay(alignment: .bottomTrailing) {
-                            // 사진 위의 떠 있는 컨트롤: clear 유리 + 밝은 바탕 대비용 35% 딤.
-                            Button("재생", systemImage: "play.fill") {}
+                            // A floating control over a photo: clear glass + a 35% dim for contrast on bright content.
+                            Button("Play", systemImage: "play.fill") {}
                                 .labelStyle(.iconOnly)
                                 .frame(width: 44, height: 44)
                                 .background(.black.opacity(0.35), in: Circle())
@@ -950,15 +949,15 @@ struct GlassLayeringExample: View {
                                 .padding(12)
                         }
                     ForEach(0..<30, id: \.self) { i in
-                        Text("행 \(i)").frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).padding(.horizontal)
+                        Text("Row \(i)").frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).padding(.horizontal)
                     }
                 }
             }
-            .scrollEdgeEffectStyle(.soft, for: .top)   // 툴바 배경 대신
-            .navigationTitle("보관함")
+            .scrollEdgeEffectStyle(.soft, for: .top)   // instead of a toolbar background
+            .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("완료") {}.buttonStyle(.glassProminent)
+                    Button("Done") {}.buttonStyle(.glassProminent)
                 }
             }
         }
@@ -966,7 +965,7 @@ struct GlassLayeringExample: View {
 }
 
 extension View {
-    /// 거절된 입력: trigger가 바뀔 때마다 좌우로 잦아드는 흔들림 한 번.
+    /// Rejected input: one side-to-side shake that dies down, every time the trigger changes.
     func rejectShake<T: Equatable & Sendable>(trigger: T) -> some View {
         modifier(RejectShake(trigger: trigger))
     }
@@ -977,7 +976,7 @@ struct RejectShake<T: Equatable & Sendable>: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
-        let amplitude = reduceMotion ? 0.0 : 1.0   // 클로저 밖에서 읽는다(Swift 6 격리)
+        let amplitude = reduceMotion ? 0.0 : 1.0   // read outside the closure (Swift 6 isolation)
         return content.keyframeAnimator(initialValue: 0.0, trigger: trigger) { view, x in
             view.offset(x: x * amplitude)
         } keyframes: { _ in

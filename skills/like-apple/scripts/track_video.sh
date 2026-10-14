@@ -1,5 +1,5 @@
 #!/bin/bash
-# track_video.swift 를 컴파일해 실행한다. 사용법은 track_video.swift 머리말 참고.
+# Compiles and runs track_video.swift. See its header for usage.
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 BIN="${TMPDIR:-/tmp}/like-apple-track-video"

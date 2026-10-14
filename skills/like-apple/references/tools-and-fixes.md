@@ -44,7 +44,7 @@ Read this when choosing a SwiftUI API for a motion (§1), checking platform spec
 | Input | Finger, direct manipulation | Finger + pointer + keyboard | Pointer / trackpad |
 | Hover | None (`.onHover` simply never fires; harmless) | `.onHover` / `.hoverEffect` with a pointer | **Required** — say "here" before the click |
 | Horizontal swipe | Both `DragGesture` and scroll | Same | Two-finger swipes are *scroll events* → never reach `DragGesture`. Use `ScrollView` paging |
-| Haptics | `.sensoryFeedback` (17+) or `UIFeedbackGenerator` | Most have no haptic engine — supplementary only | `.sensoryFeedback` compiles but is mostly **silent** (confirmed in Live Peninsula). Use `NSHapticFeedbackManager` (recipes §13) |
+| Haptics | `.sensoryFeedback` (17+) or `UIFeedbackGenerator` | Most have no haptic engine — supplementary only | `.sensoryFeedback` compiles but is mostly **silent**. Use `NSHapticFeedbackManager` (recipes §13) |
 | Size | Fixed screen | Variable via Split View / Stage Manager — never assume fixed pt | Resizable windows |
 | Press scale | 0.94–0.97 | Same | Same + hover brightness |
 | Pointer effects | — | highlight (small, transparent background) · lift (small, opaque) · hover (large; tint instead of scale) — recipes §24 | Hover brightness + system cursors (`.pointerStyle`, macOS 15+) |
